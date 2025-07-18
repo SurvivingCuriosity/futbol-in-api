@@ -1,4 +1,4 @@
-import { ApiErrorPayload } from "./apiResponse";
+import { ApiErrorPayload } from "./ApiResponse";
 
 export class ApiError extends Error {
   constructor(
