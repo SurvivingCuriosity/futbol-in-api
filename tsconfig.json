@@ -2,48 +2,26 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "module": "nodenext",
+    "module": "es2022",
     "target": "ES2022",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true               
   },
   "tsc-alias": {
     "verbose": false,
     "resolveFullPaths": true,
-    "replacers": {
-      "exampleReplacer": {
-        "enabled": true,
-        "file": "./exampleReplacer.js"
-      },
-      "otherReplacer": {
-        "enabled": true,
-        "file": "./otherReplacer.js"
-      }
-    },
     "fileExtensions": {
       "inputGlob": "{js,jsx,mjs}",
-      "outputCheck": [
-        "js",
-        "json",
-        "jsx",
-        "mjs"
-      ]
+      "outputCheck": ["js", "json", "jsx", "mjs"]
     }
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
