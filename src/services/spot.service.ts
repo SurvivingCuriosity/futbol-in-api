@@ -1,5 +1,5 @@
-import { ISpot } from "@/models/futbolin.model";
-import { findAll } from "@/repositories/futbolin.repository";
+import { ISpot } from "@/models/futbolin.model.js";
+import { findAll } from "@/repositories/futbolin.repository.js";
 import { TipoFutbolin, TipoLugar } from "futbol-in-core/enum";
 import { SpotDTO } from "futbol-in-core/types";
 
