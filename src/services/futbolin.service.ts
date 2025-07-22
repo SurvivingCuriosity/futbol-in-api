@@ -1,11 +1,16 @@
 import { ISpot } from "@/models/futbolin.model.js";
-import { findAll } from "@/repositories/futbolin.repository.js";
+import { findAll, findByUserId } from "@/repositories/futbolin.repository.js";
 import { TipoFutbolin, TipoLugar } from "futbol-in-core/enum";
 import { SpotDTO } from "futbol-in-core/types";
 
 export const getAll = async (): Promise<SpotDTO[]> => {
   const docs = await findAll();
   return docs.map(toDTO);
+};
+
+export const getSpotsDeUsuario = async (idUsuario: string): Promise<SpotDTO[]> => {
+  const spots = await findByUserId(idUsuario);
+  return spots.map(toDTO);
 };
 
 const toDTO = (lugar: ISpot): SpotDTO => ({
