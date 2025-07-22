@@ -6,6 +6,7 @@ import { ApiError } from "@/utils/ApiError";
 import { SpotDTO, UserDTO } from "futbol-in-core/types";
 import { getSpotsDeUsuario } from "./futbolin.service";
 import { getSignedReadUrl } from "./gcp_storage.service";
+import { findAll } from "@/repositories/user.repository";
 
 export const getFullUser = async (userId: string) => {
   // 1. Usuario
@@ -41,6 +42,11 @@ export const getFullUser = async (userId: string) => {
     imagen: imageUrl,
     futbolines,
   };
+};
+
+export const getAllUsers = async (): Promise<UserDTO[]> => {
+  const users = await findAll();
+  return users.map(mapToDTO);
 };
 
 export const mapToDTO = (user: IUserDocument): UserDTO => {
