@@ -8,6 +8,7 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ) => {
+  console.log('middleware.errorHandler: Error: ', err)
   const apiErr =
     err instanceof ApiError ? err : new ApiError(500, "Unexpected error");
   res
