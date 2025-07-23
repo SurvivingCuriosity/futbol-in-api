@@ -1,8 +1,8 @@
 import { getRankingController } from "@/controllers/ranking.controller";
 import { responseHandler } from "@/middleware";
 import { validateQuery } from "@/middleware/validateQuery";
-import { rankingQuerySchema } from "@/validation/ranking/getRanking.validation";
 import { Router } from "express";
+import { rankingQuerySchema } from "futbol-in-core/schemas";
 
 const router = Router();
 

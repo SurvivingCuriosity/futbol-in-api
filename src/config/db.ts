@@ -24,7 +24,7 @@ export const connectDB = async () => {
     isConnected = false;
   });
 
-  console.log(`🚀 Base de datos conectada en ${MONGO.URI}`);
+  console.log(`🚀 Base de datos conectada`);
 
   return mongoose;
 };

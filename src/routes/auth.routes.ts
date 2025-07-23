@@ -1,7 +1,7 @@
 import { loginController } from "@/controllers/login.controller";
 import { responseHandler } from "@/middleware";
 import { validate } from "@/middleware/validate";
-import { loginSchema } from "@/validation/auth/login.validation";
+import { loginSchema } from "futbol-in-core/schemas";
 import { Router } from "express";
 
 const router = Router();

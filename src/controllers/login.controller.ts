@@ -1,7 +1,7 @@
 import { login } from "@/services/login.service";
 import { ok } from "@/utils/ApiResponse";
 import { ApiResponse } from "@/utils/ApiResponse";
-import { LoginBody } from "@/validation/auth/login.validation";
+import { LoginBody } from "futbol-in-core/schemas";
 
 export const loginController = async (req: {
   validated: LoginBody;

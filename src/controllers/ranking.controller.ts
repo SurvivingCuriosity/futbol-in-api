@@ -1,7 +1,7 @@
 import { getRanking } from "@/services/ranking.service";
 import { ok } from "@/utils/ApiResponse";
 import { ApiResponse } from "@/utils/ApiResponse";
-import { RankingQuery } from "@/validation/ranking/getRanking.validation";
+import { RankingQuery } from "futbol-in-core/schemas";
 import { UsuarioEnRanking } from "futbol-in-core/types";
 
 export const getRankingController = async (

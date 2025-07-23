@@ -1,9 +1,9 @@
 import { findByEmail } from "@/repositories/user.repository";
 import { ApiError } from "@/utils/ApiError";
 import { MobileJwtPayload, signToken } from "@/utils/jwt";
-import { LoginBody } from "@/validation/auth/login.validation";
 import * as bcrypt from "bcrypt";
 import { UserRole, UserStatus } from "futbol-in-core/enum";
+import { LoginBody } from "futbol-in-core/schemas";
 
 export const login = async ({ email, password }: LoginBody) => {
   console.log("Login service: ", { email, password });
