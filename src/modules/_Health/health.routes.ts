@@ -1,4 +1,4 @@
-import { health } from '@/controllers/health.controller';
+import { health } from '@/modules/_Health/health.controller';
 import { responseHandler } from '@/middleware';
 import { Router } from 'express';
 

@@ -1,12 +1,17 @@
-import { getRanking } from "@/services/ranking.service";
+import { RankingService } from './ranking.service';
 import { ok } from "@/utils/ApiResponse";
 import { ApiResponse } from "@/utils/ApiResponse";
 import { RankingQuery } from "futbol-in-core/schemas";
 import { UsuarioEnRanking } from "futbol-in-core/types";
 
-export const getRankingController = async (
+export const getRanking = async (
   req: { validatedQuery: RankingQuery }
 ): Promise<ApiResponse<UsuarioEnRanking[]>> => {
-  const data = await getRanking(req.validatedQuery.limit);
+  const data = await RankingService.getRanking(req.validatedQuery.limit);
   return ok(data, "Ranking calculado");
+};
+
+
+export const RankingController = {
+  getRanking,
 };

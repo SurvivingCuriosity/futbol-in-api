@@ -1,14 +1,12 @@
-import { findByEmail } from "@/repositories/user.repository";
+import { UserRepository } from "@/modules/User/user.repository";
 import { ApiError } from "@/utils/ApiError";
-import { MobileJwtPayload, signToken } from "@/utils/jwt";
+import { JwtPayload, signToken } from "@/utils/jwt";
 import * as bcrypt from "bcrypt";
 import { UserRole, UserStatus } from "futbol-in-core/enum";
 import { LoginBody } from "futbol-in-core/schemas";
 
-export const login = async ({ email, password }: LoginBody) => {
-  console.log("Login service: ", { email, password });
-
-  const user = await findByEmail(email);
+const login = async ({ email, password }: LoginBody) => {
+  const user = await UserRepository.findByEmail(email);
 
   const valid = user && (await bcrypt.compare(password, user.password ?? ""));
 
@@ -16,7 +14,7 @@ export const login = async ({ email, password }: LoginBody) => {
     throw new ApiError(401, "Credenciales inválidas");
   }
 
-  const payload: MobileJwtPayload = {
+  const payload: JwtPayload = {
     id: String(user._id),
     email: user.email ?? "",
     name: user.name ?? "",
@@ -30,3 +28,7 @@ export const login = async ({ email, password }: LoginBody) => {
 
   return { token, user: payload };
 };
+
+export const AuthService = {
+  login,
+}

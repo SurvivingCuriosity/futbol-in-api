@@ -1,9 +1,11 @@
-import { SignJWT, jwtVerify, JWTPayload } from "jose";
+import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 
-const secretKey = new TextEncoder().encode(process.env.JWT_SECRET!);
-const EXP_SECONDS = 60 * 60 * 24 * 30;
+const RAW_SECRET = process.env.JWT_SECRET;
+if (!RAW_SECRET) throw new Error('Falta JWT_SECRET');
+export const secretKey = new TextEncoder().encode(RAW_SECRET); // HS256 key
+const ACCESS_EXPIRES = '30d';                                   // ISO 8601
 
-export interface MobileJwtPayload extends JWTPayload {
+export interface JwtPayload extends JWTPayload {
   id: string;
   email: string;
   name: string;
@@ -13,12 +15,12 @@ export interface MobileJwtPayload extends JWTPayload {
   imagen: string;
 }
 
-export const signToken = async (payload: MobileJwtPayload) =>
+export const signToken = (payload: JwtPayload) =>
   new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(EXP_SECONDS)
+    .setExpirationTime(ACCESS_EXPIRES)
     .sign(secretKey);
 
 export const verifyToken = async (token: string) =>
-  jwtVerify<MobileJwtPayload>(token, secretKey);
+  jwtVerify<JwtPayload>(token, secretKey);

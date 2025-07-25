@@ -1,20 +1,28 @@
+import { FutbolinService } from './../Futbolines/futbolin.service';
 import { EstadoJugador, UserRole, UserStatus } from "futbol-in-core/enum";
 
 import { IUserDocument, User } from "@/models/user.model";
-import { findManyById } from "@/repositories/equipo.repository";
+import { EquipoRepository } from "@/modules/Equipos/equipo.repository";
+import { UserRepository } from "@/modules/User/user.repository";
 import { ApiError } from "@/utils/ApiError";
 import { SpotDTO, UserDTO } from "futbol-in-core/types";
-import { getSpotsDeUsuario } from "./futbolin.service";
-import { getSignedReadUrl } from "./gcp_storage.service";
-import { findAll } from "@/repositories/user.repository";
+import { getSignedReadUrl } from '@/infra/gcp_storage.service';
 
-export const getFullUser = async (userId: string) => {
+const findById = async (userId: string) => {
+   const user = await UserRepository.findById(userId); // 👈 await
+
+  if (!user) throw new ApiError(404, 'Usuario no encontrado');
+
+  return mapToDTO(user);
+}
+
+const getFullUser = async (userId: string) => {
   // 1. Usuario
   const fullUser = await User.findById(userId);
   if (!fullUser) throw new ApiError(404, "Usuario no encontrado");
 
   // 2. Equipos ACEPTADOS
-  const equipos = await findManyById(fullUser.equipos);
+  const equipos = await EquipoRepository.findManyById(fullUser.equipos);
   const equiposAceptados = equipos.filter((equipo) => {
     const jugador = equipo.jugadores.find(
       (j) => j.usuario === String(fullUser._id)
@@ -23,7 +31,7 @@ export const getFullUser = async (userId: string) => {
   });
 
   // 3. Futbolines del usuario
-  const futbolines: SpotDTO[] = await getSpotsDeUsuario(String(fullUser._id));
+  const futbolines: SpotDTO[] = await FutbolinService.getSpotsDeUsuario(String(fullUser._id));
 
   // 4. URL firmada (si hay imagen)
   let imageUrl: string | null = null;
@@ -44,8 +52,8 @@ export const getFullUser = async (userId: string) => {
   };
 };
 
-export const getAllUsers = async (): Promise<UserDTO[]> => {
-  const users = await findAll();
+const getAllUsers = async (): Promise<UserDTO[]> => {
+  const users = await UserRepository.findAll();
   return users.map(mapToDTO);
 };
 
@@ -73,3 +81,9 @@ export const mapToDTO = (user: IUserDocument): UserDTO => {
     ciudadActual: user.ciudadActual,
   };
 };
+
+export const UserService = {
+  getFullUser,
+  getAllUsers,
+  findById
+}

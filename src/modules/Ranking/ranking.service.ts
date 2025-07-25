@@ -1,9 +1,9 @@
+import { UserService } from './../User/user.service';
 import { UsuarioEnRanking } from "futbol-in-core/types";
-import { getAllUsers } from "./user.service";
 
-export const getRanking = async (limit?: number): Promise<UsuarioEnRanking[]> => {
+const getRanking = async (limit?: number): Promise<UsuarioEnRanking[]> => {
   // 1. Traer usuarios (idealmente solo los campos necesarios)
-  const users = await getAllUsers();
+  const users = await UserService.getAllUsers();
 
   // 2. Mapear + puntuar
   const list: UsuarioEnRanking[] = users.map((user, idx) => ({
@@ -29,3 +29,8 @@ export const getRanking = async (limit?: number): Promise<UsuarioEnRanking[]> =>
 
 const score = (agregados: number, revisados: number, verificados: number) =>
   agregados * 5 + revisados * 2 + verificados * 2;
+
+
+export const RankingService = {
+  getRanking,
+};
