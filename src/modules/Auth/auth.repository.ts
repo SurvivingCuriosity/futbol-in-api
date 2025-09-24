@@ -1,4 +1,4 @@
-import { IUserDocument, User } from "@/models/user.model";
+import { IUserDocument, User } from "../User/user.model";
 
 const findByEmail = (email: string) =>
   User.findOne({ email }).lean<IUserDocument | null>();

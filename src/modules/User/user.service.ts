@@ -1,12 +1,12 @@
 import { FutbolinService } from './../Futbolines/futbolin.service';
 import { EstadoJugador, UserRole, UserStatus } from "futbol-in-core/enum";
 
-import { IUserDocument, User } from "@/models/user.model";
 import { EquipoRepository } from "@/modules/Equipos/equipo.repository";
 import { UserRepository } from "@/modules/User/user.repository";
 import { ApiError } from "@/utils/ApiError";
 import { SpotDTO, UserDTO } from "futbol-in-core/types";
 import { getSignedReadUrl } from '@/infra/gcp_storage.service';
+import { IUserDocument, User } from './user.model';
 
 const findById = async (userId: string) => {
    const user = await UserRepository.findById(userId); // 👈 await

@@ -1,4 +1,4 @@
-import { IUserDocument, User } from "@/models/user.model";
+import { IUserDocument, User } from "./user.model";
 
 const findAll = () => User.find().lean<IUserDocument[]>();
 

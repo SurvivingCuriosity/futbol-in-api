@@ -1,4 +1,3 @@
-import { ISpot } from "@/models/futbolin.model.js";
 import {
   FutbolinRepository,
   SpotCreationInput,
@@ -8,6 +7,7 @@ import { AgregarFutbolin } from "futbol-in-core/schemas";
 import { SpotDTO } from "futbol-in-core/types";
 import { Types } from "mongoose";
 import { UserService } from "../User/user.service";
+import { ISpot } from "./futbolin.model";
 
 const getAll = async (): Promise<SpotDTO[]> => {
   const docs = await FutbolinRepository.findAll();
@@ -84,6 +84,8 @@ const toDTO = (lugar: ISpot): SpotDTO => ({
     up: lugar.votes.up.map((u: any) => String(u)),
     down: lugar.votes.down.map((u: any) => String(u)),
   },
+  createdAt: lugar.createdAt,
+  updatedAt: lugar.updatedAt,
 });
 
 export const FutbolinService = {

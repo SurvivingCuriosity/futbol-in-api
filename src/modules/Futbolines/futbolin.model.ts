@@ -23,11 +23,12 @@ export interface ISpot extends Document {
     idUser: ObjectId;
     fechaVerificacion: Date;
   };
-
   votes: {
     up: Types.ObjectId[];
     down: Types.ObjectId[];
   };
+  createdAt: Date;
+  updatedAt: Date;
 }
 const SpotSchema: Schema<ISpot> = new Schema(
   {

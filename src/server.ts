@@ -6,7 +6,6 @@ import { app } from "@/index";
   await connectDB(); // 1️⃣  abre el pool
 
   const server = app.listen(SERVER.PORT, () => {
-    console.log(process.env.NODE_ENV)
     console.log("Dev mode: ", DEVELOPMENT);
     console.log(`🚀 API en http://${SERVER.HOSTNAME}:${SERVER.PORT}`);
   });

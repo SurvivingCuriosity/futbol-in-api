@@ -1,5 +1,5 @@
-import { IEquipoDocument } from "@/models/equipo.model";
 import { EquipoDTO } from "futbol-in-core/types";
+import { IEquipoDocument } from "./equipo.model";
 
 const mapToDTO = (equipo: IEquipoDocument): EquipoDTO => {
   return {

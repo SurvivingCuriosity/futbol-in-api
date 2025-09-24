@@ -1,10 +1,11 @@
-import Spot, { ISpot } from "@/models/futbolin.model";
 import { ApiError } from "@/utils/ApiError";
 import { AgregarFutbolin } from "futbol-in-core/schemas";
 import { Types } from "mongoose";
+import Spot, { ISpot } from "./futbolin.model";
 
 const findAll = async (): Promise<ISpot[]> => {
   const allFutbolines = await Spot.find().lean<ISpot[]>();
+  console.log('En repo: ', allFutbolines[0])
   return allFutbolines;
 };
 

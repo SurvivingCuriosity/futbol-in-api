@@ -1,7 +1,7 @@
 import { EquipoService } from './equipo.service';
-import { Equipo } from "@/models/equipo.model";
 import { EquipoDTO } from "futbol-in-core/types";
 import { Types } from "mongoose";
+import { Equipo } from './equipo.model';
 
 const findManyById = async (
   idsEquipos: Types.ObjectId[] | undefined
