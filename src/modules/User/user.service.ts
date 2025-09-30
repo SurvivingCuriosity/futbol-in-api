@@ -1,20 +1,21 @@
-import { FutbolinService } from './../Futbolines/futbolin.service';
+import { FutbolinService } from "./../Futbolines/futbolin.service";
 import { EstadoJugador, UserRole, UserStatus } from "futbol-in-core/enum";
 
 import { EquipoRepository } from "@/modules/Equipos/equipo.repository";
 import { UserRepository } from "@/modules/User/user.repository";
 import { ApiError } from "@/utils/ApiError";
 import { SpotDTO, UserDTO } from "futbol-in-core/types";
-import { getSignedReadUrl } from '@/infra/gcp_storage.service';
-import { IUserDocument, User } from './user.model';
+import { getSignedReadUrl } from "@/infra/gcp_storage.service";
+import { IUserDocument, User } from "./user.model";
+import { EditarUserBody } from "futbol-in-core/schemas";
 
 const findById = async (userId: string) => {
-   const user = await UserRepository.findById(userId); // 👈 await
+  const user = await UserRepository.findById(userId); // 👈 await
 
-  if (!user) throw new ApiError(404, 'Usuario no encontrado');
+  if (!user) throw new ApiError(404, "Usuario no encontrado");
 
   return mapToDTO(user);
-}
+};
 
 const getFullUser = async (userId: string) => {
   // 1. Usuario
@@ -31,7 +32,9 @@ const getFullUser = async (userId: string) => {
   });
 
   // 3. Futbolines del usuario
-  const futbolines: SpotDTO[] = await FutbolinService.getSpotsDeUsuario(String(fullUser._id));
+  const futbolines: SpotDTO[] = await FutbolinService.getSpotsDeUsuario(
+    String(fullUser._id)
+  );
 
   // 4. URL firmada (si hay imagen)
   let imageUrl: string | null = null;
@@ -55,6 +58,12 @@ const getFullUser = async (userId: string) => {
 const getAllUsers = async (): Promise<UserDTO[]> => {
   const users = await UserRepository.findAll();
   return users.map(mapToDTO);
+};
+
+const editarPerfil = async (userId: string, input: EditarUserBody) => {
+  const updated = await UserRepository.updateEditableById(userId, input);
+  if (!updated) throw new ApiError(404, "Usuario no encontrado");
+  return mapToDTO(updated);
 };
 
 export const mapToDTO = (user: IUserDocument): UserDTO => {
@@ -85,5 +94,6 @@ export const mapToDTO = (user: IUserDocument): UserDTO => {
 export const UserService = {
   getFullUser,
   getAllUsers,
-  findById
-}
+  findById,
+  editarPerfil,
+};

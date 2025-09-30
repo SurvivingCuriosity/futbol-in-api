@@ -1,36 +1,43 @@
-import { UserService } from './../User/user.service';
+// src/modules/Ranking/ranking.service.ts
+import Spot from "@/modules/Futbolines/futbolin.model";
 import { UsuarioEnRanking } from "futbol-in-core/types";
+import { PipelineStage, Types } from "mongoose";
 
-const getRanking = async (limit?: number): Promise<UsuarioEnRanking[]> => {
-  // 1. Traer usuarios (idealmente solo los campos necesarios)
-  const users = await UserService.getAllUsers();
+type AggRow = {
+  _id: Types.ObjectId;           // addedByUserId
+  spotsCreados: number;
+  user?: { name?: string }[];    // del $lookup
+};
 
-  // 2. Mapear + puntuar
-  const list: UsuarioEnRanking[] = users.map((user, idx) => ({
-    id: user.id,
-    usuario: user.name,
-    posicion: idx, // si quieres ordenar por score, cambia abajo
-    spotsCreados: user.stats.lugaresAgregados ?? 0,
-    spotsVotados: user.stats.lugaresRevisados ?? 0,
-    spotsVerificados: user.stats.lugaresVerificados ?? 0,
-    puntuacion: score(
-      user.stats.lugaresAgregados ?? 0,
-      user.stats.lugaresRevisados ?? 0,
-      user.stats.lugaresVerificados ?? 0
-    ),
+export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]> {
+  const pipeline: PipelineStage[] = [
+    { $group: { _id: "$addedByUserId", spotsCreados: { $sum: 1 } } },
+    {
+      $lookup: {
+        from: "users",           // ⚠️ nombre real de la colección
+        localField: "_id",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $sort: { spotsCreados: -1, _id: 1 } },
+  ];
+
+  if (Number.isFinite(limit)) {
+    pipeline.push({ $limit: limit });
+  }
+
+  const rows = await Spot.aggregate<AggRow>(pipeline);
+
+  const list: UsuarioEnRanking[] = rows.map((r, i) => ({
+    id: String(r._id),
+    posicion: i, // si prefieres 1-based: i + 1
+    usuario: r.user?.[0]?.name ?? "(usuario desconocido)",
+    spotsCreados: r.spotsCreados,
+    puntuacion: r.spotsCreados, // ranking simple por nº de futbolines
   }));
 
-  // (Opcional) ordenar por puntuación descendente:
-  list.sort((a, b) => b.puntuacion - a.puntuacion)
-      .forEach((u, i) => (u.posicion = i));
+  return list;
+}
 
-  return typeof limit === "number" ? list.slice(0, limit) : list;
-};
-
-const score = (agregados: number, revisados: number, verificados: number) =>
-  agregados * 5 + revisados * 2 + verificados * 2;
-
-
-export const RankingService = {
-  getRanking,
-};
+export const RankingService = { getRanking };

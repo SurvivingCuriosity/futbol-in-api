@@ -73,6 +73,7 @@ const SpotSchema: Schema<ISpot> = new Schema(
   { timestamps: true }
 );
 
+SpotSchema.index({ addedByUserId: 1 });
 SpotSchema.index({ location: "2dsphere" });
 SpotSchema.index({ ciudad: "text" });
 

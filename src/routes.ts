@@ -5,6 +5,7 @@ import futbolinesRoutes from "./modules/Futbolines/futbolin.routes";
 import mapRoutes from "./modules/Maps/maps.routes";
 import rankingRoutes from "./modules/Ranking/ranking.routes";
 import userRoutes from "./modules/User/user.routes";
+import incidenciasRoutes from "./modules/Incidencias/incidencia.routes";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use("/", futbolinesRoutes);
 router.use("/", mapRoutes);
 router.use("/", rankingRoutes);
 router.use("/", userRoutes);
+router.use("/", incidenciasRoutes);
 
 export default router;
