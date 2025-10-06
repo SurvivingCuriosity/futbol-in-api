@@ -8,6 +8,8 @@ const findByEmail = (email: string) =>
 const findById = (id: string) =>
   User.findById(id).exec() as Promise<IUserDocument | null>;
 
+const create = (data: Partial<IUserDocument>) => User.create(data);
+
 type Editable = Pick<
   IUserDocument,
   "nombre" | "telefono" | "posicion" | "ciudad" | "ciudadActual" | "imagen"
@@ -63,5 +65,6 @@ export const UserRepository = {
   findAll,
   findByEmail,
   findById,
-  updateEditableById
+  updateEditableById,
+  create
 };

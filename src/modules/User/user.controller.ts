@@ -9,7 +9,6 @@ const getFullUserController = async (req: {
   ApiResponse<Awaited<ReturnType<typeof UserService.getFullUser>>>
 > => {
   const { userId } = req.validatedQuery;
-  console.log(userId);
   const data = await UserService.getFullUser(userId);
   return ok(data, "Usuario completo");
 };

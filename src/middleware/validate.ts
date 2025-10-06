@@ -8,7 +8,7 @@ export const validate =
     if (!result.success) {
       throw new ApiError(
         400,
-        "Validation Error",
+        "Error de validación zod",
         result?.error?.issues?.map((e) => ({
           field: e.path.join("."),
           message: e.message,

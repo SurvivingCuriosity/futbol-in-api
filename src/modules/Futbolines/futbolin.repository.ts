@@ -5,7 +5,6 @@ import Spot, { ISpot } from "./futbolin.model";
 
 const findAll = async (): Promise<ISpot[]> => {
   const allFutbolines = await Spot.find().lean<ISpot[]>();
-  console.log('En repo: ', allFutbolines[0])
   return allFutbolines;
 };
 

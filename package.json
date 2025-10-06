@@ -20,11 +20,12 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "futbol-in-core": "^1.0.27",
+    "futbol-in-core": "^1.0.30",
     "helmet": "^8.1.0",
     "jose": "^6.0.12",
     "mongoose": "^8.16.4",
     "morgan": "^1.10.1",
+    "nodemailer": "^7.0.7",
     "zod": "^4.0.5"
   },
   "devDependencies": {
@@ -34,6 +35,7 @@
     "@types/express": "^5.0.3",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.14",
+    "@types/nodemailer": "^7.0.2",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.20.3",
