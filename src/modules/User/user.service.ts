@@ -1,13 +1,13 @@
-import { FutbolinService } from "./../Futbolines/futbolin.service";
 import { EstadoJugador, UserRole, UserStatus } from "futbol-in-core/enum";
+import { FutbolinService } from "./../Futbolines/futbolin.service";
 
+import { getSignedReadUrl } from "@/infra/gcp_storage.service";
 import { EquipoRepository } from "@/modules/Equipos/equipo.repository";
 import { UserRepository } from "@/modules/User/user.repository";
 import { ApiError } from "@/utils/ApiError";
-import { SpotDTO, UserDTO } from "futbol-in-core/types";
-import { getSignedReadUrl } from "@/infra/gcp_storage.service";
-import { IUserDocument, User } from "./user.model";
 import { EditarUserBody } from "futbol-in-core/schemas";
+import { SpotDTO, UserDTO } from "futbol-in-core/types";
+import { IUserDocument, User } from "./user.model";
 
 const findById = async (userId: string) => {
   const user = await UserRepository.findById(userId); // 👈 await
@@ -19,7 +19,9 @@ const findById = async (userId: string) => {
 
 const getFullUser = async (userId: string) => {
   // 1. Usuario
-  const fullUser = await User.findById(userId);
+  console.log(" en servicio userId: ", userId);
+  const fullUser = await UserRepository.findById(userId);
+  console.log("en servicio fullUser: ", fullUser);
   if (!fullUser) throw new ApiError(404, "Usuario no encontrado");
 
   // 2. Equipos ACEPTADOS

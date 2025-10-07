@@ -32,7 +32,7 @@ export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]
   const list: UsuarioEnRanking[] = rows.map((r, i) => ({
     id: String(r._id),
     posicion: i, // si prefieres 1-based: i + 1
-    usuario: r.user?.[0]?.name ?? "(usuario desconocido)",
+    usuario: r.user?.[0]?.name ?? "(desconocido)",
     spotsCreados: r.spotsCreados,
     puntuacion: r.spotsCreados, // ranking simple por nº de futbolines
   }));

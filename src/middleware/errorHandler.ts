@@ -9,7 +9,7 @@ export const errorHandler = (
   _next: NextFunction
 ) => {
   const apiErr =
-    err instanceof ApiError ? err : new ApiError(500, "Unexpected error");
+    err instanceof ApiError ? err : new ApiError(500, String(err));
   res
     .status(apiErr.statusCode)
     .json(

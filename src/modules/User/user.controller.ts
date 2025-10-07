@@ -2,6 +2,7 @@ import { ApiResponse, ok } from "@/utils/ApiResponse";
 import { editarUserBodySchema, GetFullUserQuery } from "futbol-in-core/schemas";
 import { UserService } from "./user.service";
 import { ApiError } from "@/utils/ApiError";
+import { isValidObjectId } from "mongoose";
 
 const getFullUserController = async (req: {
   validatedQuery: GetFullUserQuery;
@@ -9,12 +10,14 @@ const getFullUserController = async (req: {
   ApiResponse<Awaited<ReturnType<typeof UserService.getFullUser>>>
 > => {
   const { userId } = req.validatedQuery;
+
+  if(!isValidObjectId(userId)) throw new ApiError(400, "Usuario no existente");
+
   const data = await UserService.getFullUser(userId);
   return ok(data, "Usuario completo");
 };
 
 const editarUserController = async (req: Request) => {
-  // `requireAuth` debe haber puesto req.user.id
   const userId = (req as any).user?.id as string;
   if (!userId) throw new ApiError(403, "No tienes permisos para editar");
 
