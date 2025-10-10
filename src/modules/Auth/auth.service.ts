@@ -1,24 +1,28 @@
 import { sendVerifyEmail } from "@/infra/mailservice";
-import { AuthRepository } from "./auth.repository";
 import { UserRepository } from "@/modules/User/user.repository";
 import { ApiError } from "@/utils/ApiError";
 import { JwtPayload, signToken } from "@/utils/jwt";
 import * as bcrypt from "bcrypt";
 import { AuthProvider, UserRole, UserStatus } from "futbol-in-core/enum";
 import {
+  GoogleSignInBody,
   LoginBody,
   RegisterBody,
-  VerifyEmailBody,
   ResendCodeBody,
-  GoogleSignInBody,
+  VerifyEmailBody,
 } from "futbol-in-core/schemas";
-import { buildJwt, gen6Code, normalizeEmail, normalizeUsername } from "./auth.utils";
 import { OAuth2Client } from "google-auth-library";
+import { AuthRepository } from "./auth.repository";
+import {
+  buildJwt,
+  gen6Code,
+  normalizeEmail,
+  normalizeUsername,
+} from "./auth.utils";
 const CODE_TTL_MINUTES = 10;
 const BCRYPT_ROUNDS = 10;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
-
 
 const login = async ({ email, password }: LoginBody) => {
   const user = await AuthRepository.findByEmail(normalizeEmail(email));
@@ -43,10 +47,12 @@ const register = async ({ email, username, password }: RegisterBody) => {
   const usernameN = normalizeUsername(username);
 
   const existingByEmail = await AuthRepository.findByEmail(emailN);
-  if (existingByEmail) throw new ApiError(409, "Ya existe una cuenta con ese email");
+  if (existingByEmail)
+    throw new ApiError(409, "Ya existe una cuenta con ese email");
 
   const existingByUsername = await AuthRepository.findByUsername(usernameN);
-  if (existingByUsername) throw new ApiError(409, "Nombre de usuario no disponible");
+  if (existingByUsername)
+    throw new ApiError(409, "Nombre de usuario no disponible");
 
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const code = gen6Code();
@@ -64,6 +70,9 @@ const register = async ({ email, username, password }: RegisterBody) => {
   });
 
   await sendVerifyEmail(emailN, code);
+
+  // login
+  return login({ email, password });
 };
 
 const verifyEmail = async ({ email, code }: VerifyEmailBody) => {
@@ -99,7 +108,8 @@ const resendCode = async ({ email }: ResendCodeBody) => {
   const emailN = normalizeEmail(email);
   const user = await AuthRepository.findByEmailWithSensitive(emailN);
   if (!user) throw new ApiError(404, "Usuario no encontrado");
-  if (user.status === UserStatus.DONE) throw new ApiError(400, "El correo ya está verificado");
+  if (user.status === UserStatus.DONE)
+    throw new ApiError(400, "El correo ya está verificado");
 
   // Genera nuevo código y reinicia TTL
   const code = gen6Code();
@@ -116,7 +126,8 @@ export const googleSignIn = async ({ idToken }: GoogleSignInBody) => {
     audience: GOOGLE_CLIENT_ID,
   });
   const payload = ticket.getPayload();
-  if (!payload?.email || !payload.email_verified) throw new ApiError(400, "Email de Google no verificado");
+  if (!payload?.email || !payload.email_verified)
+    throw new ApiError(400, "Email de Google no verificado");
   const email = normalizeEmail(payload.email);
 
   const existing = await AuthRepository.findByEmailWithSensitive(email);
@@ -143,22 +154,42 @@ export const googleSignIn = async ({ idToken }: GoogleSignInBody) => {
   return { token, user: p };
 };
 
-export const setUsername = async ({ userId, username }: { userId: string; username: string }) => {
+export const setUsername = async ({
+  userId,
+  username,
+}: {
+  userId: string;
+  username: string;
+}) => {
+  console.log("__userId:", userId);
   const usernameN = normalizeUsername(username);
 
-  const me = await AuthRepository.findByIdWithSensitive(userId);
+  const me = await UserRepository.findById(userId);
+  console.log("__me:", me);
+
   if (!me) throw new ApiError(404, "Usuario no encontrado");
-  if (me.provider !== AuthProvider.GOOGLE) throw new ApiError(400, "Solo aplica a cuentas Google");
-  if (me.status !== UserStatus.MUST_CREATE_USERNAME) throw new ApiError(400, "El usuario ya tiene username");
+  if (me.provider !== AuthProvider.GOOGLE)
+    throw new ApiError(400, "Solo aplica a cuentas Google");
+  if (me.status !== UserStatus.MUST_CREATE_USERNAME)
+    throw new ApiError(400, "El usuario ya tiene username");
 
   const conflict = await AuthRepository.findByUsername(usernameN);
   if (conflict) throw new ApiError(409, "Nombre de usuario no disponible");
 
   await AuthRepository.setUsernameAndDone(me._id, usernameN);
 
-  const p = buildJwt({ ...me, name: usernameN }, UserStatus.DONE);
-  const token = await signToken(p);
-  return { token, user: p };
+  const payload: JwtPayload = {
+    id: String(me._id),
+    email: me.email ?? "",
+    name: me.name ?? "",
+    role: (me.role || [UserRole.USER]).map(String),
+    status: UserStatus.DONE,
+    provider: me.provider ?? "",
+    imagen: me.imagen ?? "",
+  };
+  const token = await signToken(payload);
+
+  return { token, user: payload };
 };
 
 export const AuthService = {

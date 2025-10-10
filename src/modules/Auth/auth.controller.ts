@@ -12,8 +12,8 @@ export const login = async (req: {
 };
 
 const register = async (req: { validated: RegisterBody }) => {
-  await AuthService.register(req.validated);
-  return ok(null, "Te enviamos un código de verificación a tu correo.");
+  const {token, user} = await AuthService.register(req.validated);
+  return ok({ token, user }, "Te enviamos un código de verificación a tu correo.");
 };
 
 const verifyEmail = async (req: { validated: VerifyEmailBody }) => {
