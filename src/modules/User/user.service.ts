@@ -1,8 +1,7 @@
-import { EstadoJugador, UserRole, UserStatus } from "futbol-in-core/enum";
+import { UserRole, UserStatus } from "futbol-in-core/enum";
 import { FutbolinService } from "./../Futbolines/futbolin.service";
 
 import { getSignedReadUrl } from "@/infra/gcp_storage.service";
-import { EquipoRepository } from "@/modules/Equipos/equipo.repository";
 import { UserRepository } from "@/modules/User/user.repository";
 import { ApiError } from "@/utils/ApiError";
 import { EditarUserBody } from "futbol-in-core/schemas";
@@ -23,13 +22,6 @@ const getFullUser = async (userId: string) => {
   if (!fullUser) throw new ApiError(404, "Usuario no encontrado");
 
   // 2. Equipos ACEPTADOS
-  const equipos = await EquipoRepository.findManyById(fullUser.equipos);
-  const equiposAceptados = equipos.filter((equipo) => {
-    const jugador = equipo.jugadores.find(
-      (j) => j.usuario === String(fullUser._id)
-    );
-    return jugador?.estado === EstadoJugador.ACEPTADO;
-  });
 
   // 3. Futbolines del usuario
   const futbolines: SpotDTO[] = await FutbolinService.getSpotsDeUsuario(
@@ -49,7 +41,6 @@ const getFullUser = async (userId: string) => {
 
   return {
     user: mapToDTO(fullUser),
-    equipos: equiposAceptados,
     imagen: imageUrl,
     futbolines,
   };
