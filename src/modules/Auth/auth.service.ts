@@ -161,12 +161,10 @@ export const setUsername = async ({
   userId: string;
   username: string;
 }) => {
-  console.log("__userId:", userId);
+
   const usernameN = normalizeUsername(username);
-
   const me = await UserRepository.findById(userId);
-  console.log("__me:", me);
-
+  
   if (!me) throw new ApiError(404, "Usuario no encontrado");
   if (me.provider !== AuthProvider.GOOGLE)
     throw new ApiError(400, "Solo aplica a cuentas Google");

@@ -19,9 +19,7 @@ const findById = async (userId: string) => {
 
 const getFullUser = async (userId: string) => {
   // 1. Usuario
-  console.log(" en servicio userId: ", userId);
   const fullUser = await UserRepository.findById(userId);
-  console.log("en servicio fullUser: ", fullUser);
   if (!fullUser) throw new ApiError(404, "Usuario no encontrado");
 
   // 2. Equipos ACEPTADOS

@@ -12,7 +12,6 @@ export async function gmapsGet<T>(path: string, qs: Record<string, string>) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
   const json = (await res.json()) as { status: string } & T;
-
   if (json.status !== 'OK')
     throw new Error(`Google Maps error: ${json.status}`);
 
@@ -20,10 +19,36 @@ export async function gmapsGet<T>(path: string, qs: Record<string, string>) {
 }
 
 export const getCoordinatesFromPlaceId = async (placeId: string) => {
+  
   type GRes = { result: { geometry: { location: { lat: number; lng: number } } } };
   const data = await gmapsGet<GRes>('/place/details/json', {
     place_id: placeId,
     fields: 'geometry',
   });
   return data.result.geometry.location;
+};
+
+export const baresAutocompleteService = async (input: string) => {
+  const data = await gmapsGet('/place/autocomplete/json', {
+    input: input,
+    types: 'establishment'
+  });
+  return data
+};
+
+export const direccionesAutocompleteService = async (input: string) => {
+  const data = await gmapsGet('/place/autocomplete/json', {
+    input: input,
+    types: 'address'
+  });
+  return data
+};
+
+export const getCoordinatesFromString = async (string: string) => {
+  type GRes = { results: { geometry: { location: { lat: number; lng: number } } }[] };
+  const data = await gmapsGet<GRes>('/geocode/json', {
+    address: string,
+    fields: 'geometry',
+  });
+  return data.results[0].geometry.location;
 };

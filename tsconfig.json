@@ -5,9 +5,8 @@
     "module": "es2022",
     "target": "ES2022",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

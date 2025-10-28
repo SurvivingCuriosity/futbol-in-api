@@ -17,3 +17,4 @@ export async function sendVerifyEmail(to:string, code:string) {
   });
   return info.messageId;
 }
+
