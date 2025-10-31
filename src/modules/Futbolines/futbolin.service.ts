@@ -7,7 +7,7 @@ import { AgregarFutbolin } from "futbol-in-core/schemas";
 import { SpotDTO } from "futbol-in-core/types";
 import { Types } from "mongoose";
 import { UserService } from "../User/user.service";
-import { ISpot } from "./futbolin.model";
+import { FutbolinDoc } from "./futbolin.model";
 
 const getAll = async (): Promise<SpotDTO[]> => {
   const docs = await FutbolinRepository.findAll();
@@ -31,9 +31,6 @@ export const agregarFutbolin = async (
   // 3. Construir documento
 
   const addedByUserId = new Types.ObjectId(userDb.id);
-  const idOperador = userDb.idOperador
-    ? new Types.ObjectId(userDb.idOperador)
-    : null;
   const verificado = userJwt.role.includes(UserRole.VERIFICADO)
     ? {
         correcto: true,
@@ -46,7 +43,7 @@ export const agregarFutbolin = async (
     ...futbolinACrear,
     addedByUserId,
     verificado,
-    idOperador,
+    idOperador: null,
     coordinates: [futbolinACrear.coordinates[1], futbolinACrear.coordinates[0]],
   };
 
@@ -60,32 +57,27 @@ export const agregarFutbolin = async (
   return toDTO(created);
 };
 
-const toDTO = (lugar: ISpot): SpotDTO => ({
+// TODO UPDATE SPOTDTO
+const toDTO = (lugar: FutbolinDoc): SpotDTO => ({
   id: String(lugar._id),
   nombre: lugar.nombre,
   direccion: lugar.direccion,
   googlePlaceId: lugar.googlePlaceId,
   ciudad: lugar.ciudad,
-  coordinates: [...lugar.location.coordinates],
-  idOperador: lugar.idOperador ? String(lugar.idOperador) : null,
+  coordinates: [
+    lugar.location?.coordinates[1] ?? 0,
+    lugar.location?.coordinates[0] ?? 0,
+  ],
   tipoLugar: lugar.tipoLugar as TipoLugar,
   tipoFutbolin: lugar.tipoFutbolin as TipoFutbolin,
   distribucion: lugar.distribucion,
-  comentarios: lugar.comentarios,
+  comentarios: lugar.comentarios ?? "",
   addedByUserId: String(lugar.addedByUserId),
-  verificado: lugar.verificado
-    ? {
-        correcto: lugar.verificado.correcto,
-        idUser: String(lugar.verificado.idUser),
-        fechaVerificacion: lugar.verificado.fechaVerificacion,
-      }
-    : null,
-  votes: {
-    up: lugar.votes.up.map((u: any) => String(u)),
-    down: lugar.votes.down.map((u: any) => String(u)),
-  },
   createdAt: lugar.createdAt,
   updatedAt: lugar.updatedAt,
+  idOperador: null,
+  verificado: null,
+  votes: {up:[], down:[]},
 });
 
 export const FutbolinService = {

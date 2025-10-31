@@ -1,40 +1,40 @@
 import { Types } from "mongoose";
-import Incidencia, { IIncidencia } from "./incidencia.model";
+import { IncidenciaDoc, IncidenciaModel } from "./incidencia.model";
 
 const create = async (input: {
   spotId: Types.ObjectId;
   userId: Types.ObjectId;
   texto: string;
 }) => {
-  const doc = await Incidencia.create(input);
-  return doc.toObject<IIncidencia>();
+  const doc = await IncidenciaModel.create(input);
+  return doc.toObject<IncidenciaDoc>();
 };
 
-const findAll = async (): Promise<IIncidencia[]> => {
-  return Incidencia.find().lean<IIncidencia[]>();
+const findAll = async (): Promise<IncidenciaDoc[]> => {
+  return IncidenciaModel.find().lean<IncidenciaDoc[]>();
 };
 
-const findBySpotId = async (spotId: string): Promise<IIncidencia[]> => {
-  return Incidencia.find({ spotId })
+const findBySpotId = async (spotId: string): Promise<IncidenciaDoc[]> => {
+  return IncidenciaModel.find({ spotId })
     .sort({ createdAt: -1 })
-    .lean<IIncidencia[]>();
+    .lean<IncidenciaDoc[]>();
 };
 
-const findById = async (id: string): Promise<IIncidencia | null> => {
-  return Incidencia.findById(id).lean<IIncidencia | null>();
+const findById = async (id: string): Promise<IncidenciaDoc | null> => {
+  return IncidenciaModel.findById(id).lean<IncidenciaDoc | null>();
 };
 
 const resolveById = async (id: string, resuelto: boolean) => {
-  const updated = await Incidencia.findByIdAndUpdate(
+  const updated = await IncidenciaModel.findByIdAndUpdate(
     id,
     { $set: { resuelto } },
     { new: true }
-  ).lean<IIncidencia | null>();
+  ).lean<IncidenciaDoc | null>();
   return updated;
 };
 
 const removeById = async (id: string) => {
-  await Incidencia.findByIdAndDelete(id);
+  await IncidenciaModel.findByIdAndDelete(id);
 };
 
 export const IncidenciaRepository = {

@@ -1,13 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import { JwtPayload, verifyToken } from '@/utils/jwt';
 import { ApiError } from '@/utils/ApiError';
-
-export interface AuthRequest extends Request {
-  user?: JwtPayload;
-}
+import { verifyToken } from '@/utils/jwt';
+import { NextFunction, Request, Response } from 'express';
 
 export const requireAuth = async (
-  req: AuthRequest,
+  req: Request,
   _res: Response,
   next: NextFunction
 ) => {

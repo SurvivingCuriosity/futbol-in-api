@@ -1,16 +1,6 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { HydratedDocument, InferSchemaType, model, Schema } from "mongoose";
 
-export interface IIncidencia extends Document {
-  _id: Types.ObjectId;
-  spotId: Types.ObjectId;
-  userId: Types.ObjectId;
-  texto: string;
-  resuelto: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const IncidenciaSchema = new Schema<IIncidencia>(
+const IncidenciaSchema = new Schema(
   {
     spotId: {
       type: Schema.Types.ObjectId,
@@ -32,8 +22,9 @@ const IncidenciaSchema = new Schema<IIncidencia>(
 
 IncidenciaSchema.index({ spotId: 1, createdAt: -1 });
 
-const Incidencia: Model<IIncidencia> =
-  mongoose.models.Incidencia ||
-  mongoose.model<IIncidencia>("Incidencia", IncidenciaSchema);
-
-export default Incidencia;
+export type Incidencia = InferSchemaType<typeof IncidenciaSchema>;
+export type IncidenciaDoc = HydratedDocument<Incidencia>;
+export const IncidenciaModel = model<IncidenciaDoc>(
+  "Incidencia",
+  IncidenciaSchema
+);

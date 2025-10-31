@@ -1,23 +1,22 @@
-import { IUserDocument, User } from "./user.model";
+import { EditarUserBody } from "futbol-in-core/schemas";
+import { UserDoc, UserModel } from "./user.model";
+import { UserStatus } from "futbol-in-core/enum";
 
-const findAll = () => User.find().lean<IUserDocument[]>();
+const findAll = () => UserModel.find().lean<UserDoc[]>();
 
 const findByEmail = (email: string) =>
-  User.findOne({ email }).lean<IUserDocument | null>();
+  UserModel.findOne({ email }).lean<UserDoc | null>();
+
+const findByUsername = (username: string) =>
+  UserModel.findOne({ name: username }).lean<UserDoc | null>();
 
 const findById = (id: string) =>
-  User.findById(id).exec() as Promise<IUserDocument | null>;
+  UserModel.findById(id).exec() as Promise<UserDoc | null>;
 
-const create = (data: Partial<IUserDocument>) => User.create(data);
-
-type Editable = Pick<
-  IUserDocument,
-  "nombre" | "telefono" | "posicion" | "ciudad" | "ciudadActual" | "imagen"
->;
+const create = (data: Partial<UserDoc>) => UserModel.create(data);
 
 const projection = {
   id: 1,
-  idOperador: 1,
   name: 1,
   email: 1,
   imagen: 1,
@@ -25,13 +24,9 @@ const projection = {
   role: 1,
   provider: 1,
   createdAt: 1,
-  stats: 1,
-  equipos: 1,
   nombre: 1,
-  telefono: 1,
   posicion: 1,
   ciudad: 1,
-  ciudadActual: 1,
 } as const;
 
 // Helper: filtra undefined (no pisa con undefined)
@@ -43,22 +38,43 @@ function buildSet(data: Record<string, unknown>) {
   return $set;
 }
 
-const updateEditableById = async (id: string, input: Partial<Editable>) => {
+const updateEditableById = async (id: string, input: EditarUserBody) => {
   const $set = buildSet({
+    name: input.name,
     nombre: input.nombre,
-    telefono: input.telefono,
     posicion: input.posicion,
     ciudad: input.ciudad,
-    ciudadActual: input.ciudadActual,
-    imagen: input.imagen,
     updatedAt: new Date(),
   });
 
-  return User.findByIdAndUpdate(
+  return UserModel.findByIdAndUpdate(
     id,
     { $set },
     { new: true, runValidators: true, projection }
-  ).lean<IUserDocument | null>();
+  ).lean<UserDoc | null>();
+};
+
+const updateEmail = async (id: string, nuevoEmail: string, code: string) => {
+  return UserModel.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        email: nuevoEmail,
+        status: UserStatus.MUST_CONFIRM_EMAIL,
+        emailVerificationCode: code,
+        emailVerificationExpires: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    },
+    { new: true }
+  ).lean<UserDoc | null>();
+};
+
+const updateImage = async (userId: string, path: string | null) => {
+  return UserModel.findByIdAndUpdate(
+    userId,
+    { imagen: path },
+    { new: true }
+  );
 };
 
 export const UserRepository = {
@@ -66,5 +82,8 @@ export const UserRepository = {
   findByEmail,
   findById,
   updateEditableById,
-  create
+  create,
+  findByUsername,
+  updateEmail,
+  updateImage
 };

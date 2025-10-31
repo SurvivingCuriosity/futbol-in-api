@@ -1,21 +1,20 @@
-import { ApiResponse, ok } from "@/utils/ApiResponse";
-import { FutbolinService } from "./futbolin.service";
-import { AuthRequest } from "@/middleware/auth";
+import { ok } from "@/utils/ApiResponse";
+import { ValidatedRequest } from "@/utils/types";
 import { AgregarFutbolin } from "futbol-in-core/schemas";
-
-const getAll = async () => {
-  const spots = await FutbolinService.getAll();
-  return ok(spots, "Lista de futbolines");
-};
-
-export const agregarFutbolin = async (
-  req: AuthRequest & { validated: AgregarFutbolin }
-): Promise<ApiResponse<unknown>> => {
-  const spot = await FutbolinService.agregarFutbolin(req.validated, req.user!);
-  return ok(spot, "Futbolín creado");
-};
+import { FutbolinService } from "./futbolin.service";
 
 export const FutbolinController = {
-  getAll,
-  agregarFutbolin,
+  getAll: async () => {
+    const futbolines = await FutbolinService.getAll();
+    return ok(futbolines, "Lista de futbolines");
+  },
+
+  // TODO: rename AgregarFutbolin to AgregarFutbolinBody
+  agregarFutbolin: async (req: ValidatedRequest<any, AgregarFutbolin>) => {
+    const futbolinCreado = await FutbolinService.agregarFutbolin(
+      req.validated,
+      req.user!
+    );
+    return ok(futbolinCreado, "Futbolín creado");
+  },
 };

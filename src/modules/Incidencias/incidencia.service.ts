@@ -1,10 +1,12 @@
-import { ResolverIncidencia } from './../../../node_modules/futbol-in-core/dist/schemas/incidencias/incidencias.validation.d';
-import { Types } from "mongoose";
 import { ApiError } from "@/utils/ApiError";
 import { UserRole } from "futbol-in-core/enum";
-import Spot from "@/modules/Futbolines/futbolin.model";
+import {
+  CrearIncidenciaBody,
+  ResolverIncidenciaBody,
+} from "futbol-in-core/schemas";
+import { Types } from "mongoose";
+import { FutbolinModel } from "../Futbolines/futbolin.model";
 import { IncidenciaRepository } from "./incidencia.repository";
-import { CrearIncidencia } from "futbol-in-core/schemas";
 
 export type IncidenciaDTO = {
   id: string;
@@ -26,9 +28,9 @@ const toDTO = (i: any): IncidenciaDTO => ({
   updatedAt: i.updatedAt,
 });
 
-const crear = async (body: CrearIncidencia, userJwt: { id: string }) => {
+const crear = async (body: CrearIncidenciaBody, userJwt: { id: string }) => {
   // sanity: spot existe
-  const exists = await Spot.exists({ _id: body.spotId });
+  const exists = await FutbolinModel.exists({ _id: body.spotId });
   if (!exists) throw new ApiError(404, "Futbolín no encontrado");
 
   const doc = await IncidenciaRepository.create({
@@ -54,7 +56,7 @@ const listarPorFutbolin = async (spotId: string) => {
 
 const resolver = async (
   id: string,
-  body: ResolverIncidencia,
+  body: ResolverIncidenciaBody,
   userJwt: { id: string; role: string[] }
 ) => {
   if (!userJwt.role?.includes(UserRole.ADMIN)) {

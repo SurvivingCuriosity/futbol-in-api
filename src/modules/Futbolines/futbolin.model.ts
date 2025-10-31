@@ -1,36 +1,8 @@
-import { DistribucionFutbolin, TipoFutbolin, TipoLugar } from "futbol-in-core/enum"
-import mongoose, { Document, Model, ObjectId, Schema, Types } from "mongoose";
+import { DistribucionFutbolin, TipoFutbolin, TipoLugar } from "futbol-in-core/enum";
+import { HydratedDocument, InferSchemaType, model, Schema } from "mongoose";
 
-export interface ISpot extends Document {
-  _id: Types.ObjectId;
-  nombre: string;
-  direccion: string;
-  googlePlaceId: string;
-  ciudad: string;
-  location: {
-    type: string;
-    coordinates: [number, number];
-  };
-  tipoLugar: TipoLugar;
-  tipoFutbolin: TipoFutbolin;
-  distribucion: DistribucionFutbolin;
-  comentarios: string;
-  addedByUserId: Types.ObjectId;
-  idOperador: Types.ObjectId|null;
 
-  verificado: null | {
-    correcto: boolean;
-    idUser: ObjectId;
-    fechaVerificacion: Date;
-  };
-  votes: {
-    up: Types.ObjectId[];
-    down: Types.ObjectId[];
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-const SpotSchema: Schema<ISpot> = new Schema(
+const FutbolinSchema = new Schema(
   {
     nombre: { type: String, required: true },
     direccion: { type: String, required: true },
@@ -53,31 +25,14 @@ const SpotSchema: Schema<ISpot> = new Schema(
     },
     comentarios: { type: String },
     addedByUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    idOperador: { type: Schema.Types.ObjectId, ref: "Operador", default: null, required: false },
-    verificado: {
-      type: {
-        idUser: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-        },
-        fechaVerificacion: { type: Date },
-        correcto: { type: Boolean },
-      },
-      default: null,
-    },
-    votes: {
-      up: [{ type: Schema.Types.ObjectId, ref: "User" }],
-      down: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    },
   },
   { timestamps: true }
 );
 
-SpotSchema.index({ addedByUserId: 1 });
-SpotSchema.index({ location: "2dsphere" });
-SpotSchema.index({ ciudad: "text" });
+FutbolinSchema.index({ addedByUserId: 1 });
+FutbolinSchema.index({ location: "2dsphere" });
+FutbolinSchema.index({ ciudad: "text" });
 
-const Spot: Model<ISpot> =
-  mongoose.models.Spot || mongoose.model<ISpot>("Spot", SpotSchema);
-
-export default Spot;
+export type Futbolin = InferSchemaType<typeof FutbolinSchema>
+export type FutbolinDoc = HydratedDocument<Futbolin>
+export const FutbolinModel = model<FutbolinDoc>("Spot", FutbolinSchema);

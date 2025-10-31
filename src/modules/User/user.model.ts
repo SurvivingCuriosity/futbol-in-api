@@ -1,40 +1,14 @@
-import { AuthProvider, Posicion, UserRole, UserStatus } from "futbol-in-core/enum";
-import { Document, Schema, Types, model } from "mongoose";
+import {
+  AuthProvider,
+  Posicion,
+  UserRole,
+  UserStatus,
+} from "futbol-in-core/enum";
+import { HydratedDocument, InferSchemaType, Schema, model } from "mongoose";
 
-export interface IUserDocument extends Document {
-  _id: Types.ObjectId;
-  idOperador: Types.ObjectId|null;
-  name?: string;
-  email: string;
-  password?: string;
-  imagen: string;
-  status?: UserStatus;
-  role?: UserRole[];
-  provider: AuthProvider;
-  createdAt?: Date;
-
-  verificationCode?: string;
-  verificationCodeExpires?: Date;
-
-  stats: {
-    addedFutbolines: number;
-    votedFutbolines: number;
-    verifiedFutbolines: number;
-  };
-
-  equipos: Types.ObjectId[];
-
-  nombre: string|undefined|null;
-  telefono: string|undefined|null;
-  posicion: Posicion|undefined|null;
-  ciudad: string|undefined|null;
-  ciudadActual: string|undefined|null;
-}
-
-const userSchema = new Schema<IUserDocument>(
+const userSchema = new Schema(
   {
     name: { type: String },
-    idOperador: { type: Schema.Types.ObjectId, ref: "Operador", default: null },
     email: { type: String, required: true },
     password: { type: String },
     imagen: { type: String, default: "" },
@@ -55,23 +29,15 @@ const userSchema = new Schema<IUserDocument>(
     },
     verificationCode: { type: String },
     verificationCodeExpires: { type: Date },
-
-    stats: {
-      addedFutbolines: { type: Number, default: 0 },
-      votedFutbolines: { type: Number, default: 0 },
-      verifiedFutbolines: { type: Number, default: 0 },
-    },
-
-    equipos: [{ type: Schema.Types.ObjectId, ref: "Equipo", default: [] }],
     nombre: { type: String, default: null },
     telefono: { type: String, default: null },
     posicion: { type: String, enum: Object.values(Posicion), default: null },
     ciudad: { type: String, default: null },
-    ciudadActual: { type: String, default: null },
   },
   {
     timestamps: true,
   }
 );
-
-export const User = model<IUserDocument>("User", userSchema);
+export type User = InferSchemaType<typeof userSchema>;
+export type UserDoc = HydratedDocument<User>;
+export const UserModel = model<UserDoc>("User", userSchema);

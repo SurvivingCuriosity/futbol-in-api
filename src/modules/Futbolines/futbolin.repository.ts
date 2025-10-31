@@ -1,17 +1,17 @@
 import { ApiError } from "@/utils/ApiError";
 import { AgregarFutbolin } from "futbol-in-core/schemas";
 import { Types } from "mongoose";
-import Spot, { ISpot } from "./futbolin.model";
+import { FutbolinDoc, FutbolinModel } from "./futbolin.model";
 
-const findAll = async (): Promise<ISpot[]> => {
-  const allFutbolines = await Spot.find().lean<ISpot[]>();
+const findAll = async (): Promise<FutbolinDoc[]> => {
+  const allFutbolines = await FutbolinModel.find().lean<FutbolinDoc[]>();
   return allFutbolines;
 };
 
-const findByUserId = async (idUsuario: string): Promise<ISpot[]> => {
-  const spotsDeUsuario = await Spot.find({
+const findByUserId = async (idUsuario: string): Promise<FutbolinDoc[]> => {
+  const spotsDeUsuario = await FutbolinModel.find({
     addedByUserId: idUsuario,
-  }).lean<ISpot[]>();
+  }).lean<FutbolinDoc[]>();
   return spotsDeUsuario;
 };
 
@@ -27,7 +27,7 @@ export type SpotCreationInput = AgregarFutbolin & {
 };
 
 const create = async (spot: SpotCreationInput) => {
-  const exists = await Spot.findOne({
+  const exists = await FutbolinModel.findOne({
     googlePlaceId: spot.googlePlaceId,
     tipoFutbolin: spot.tipoFutbolin,
   });
@@ -36,7 +36,7 @@ const create = async (spot: SpotCreationInput) => {
   }
 
   // Crear el documento
-  const created = await Spot.create({
+  const created = await FutbolinModel.create({
     ...spot,
     location: {
       type: "Point",
@@ -44,7 +44,7 @@ const create = async (spot: SpotCreationInput) => {
     },
   });
 
-  return created.toObject<ISpot>();
+  return created.toObject<FutbolinDoc>();
 };
 
 export const FutbolinRepository = {

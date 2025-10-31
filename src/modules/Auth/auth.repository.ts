@@ -1,19 +1,25 @@
-import { User, IUserDocument } from "@/modules/User/user.model";
+import { UserDoc, UserModel } from "@/modules/User/user.model";
+import { UserStatus } from "futbol-in-core/enum";
 import { Types } from "mongoose";
 
 const findByEmail = (email: string) =>
-  User.findOne({ email }).lean<IUserDocument | null>();
+  UserModel.findOne({ email }).lean<UserDoc | null>();
 
 const findByUsername = (username: string) =>
-  User.findOne({ name: username }).lean<IUserDocument | null>(); // ajusta si usas campo separado "username"
+  UserModel.findOne({ name: username }).lean<UserDoc | null>(); // ajusta si usas campo separado "username"
 
 const findByEmailWithSensitive = (email: string) =>
-  User.findOne({ email }).exec(); // no .lean para poder modificar y guardar si quisieras
+  UserModel.findOne({ email }).exec(); // no .lean para poder modificar y guardar si quisieras
 
-const findByIdWithSensitive = (id:string) => User.findById(new Types.ObjectId(id)).exec();
+const findByIdWithSensitive = (id: string) =>
+  UserModel.findById(new Types.ObjectId(id)).exec();
 
-const setVerificationCode = async (userId: Types.ObjectId, codeHash: string, expires: Date) => {
-  await User.updateOne(
+const setVerificationCode = async (
+  userId: Types.ObjectId,
+  codeHash: string,
+  expires: Date
+) => {
+  await UserModel.updateOne(
     { _id: userId },
     {
       $set: {
@@ -26,11 +32,11 @@ const setVerificationCode = async (userId: Types.ObjectId, codeHash: string, exp
 };
 
 const markEmailVerified = async (userId: Types.ObjectId) => {
-  await User.updateOne(
+  await UserModel.updateOne(
     { _id: userId },
     {
       $set: {
-        status: "DONE",
+        status: UserStatus.DONE,
       },
       $unset: {
         verificationCode: "",
@@ -40,11 +46,14 @@ const markEmailVerified = async (userId: Types.ObjectId) => {
   );
 };
 
-const setUsernameAndDone = async (userId:Types.ObjectId, username:string)=>{
-  await User.updateOne({ _id:userId }, { $set:{ name: username, status:"DONE" } });
+const setUsernameAndDone = async (userId: Types.ObjectId, username: string) => {
+  await UserModel.updateOne(
+    { _id: userId },
+    { $set: { name: username, status: UserStatus.DONE } }
+  );
 };
 
-const create = (data: Partial<IUserDocument>) => User.create(data);
+const create = (data: Partial<UserDoc>) => UserModel.create(data);
 
 export const AuthRepository = {
   findByEmail,
@@ -54,5 +63,5 @@ export const AuthRepository = {
   markEmailVerified,
   findByIdWithSensitive,
   create,
-  setUsernameAndDone
+  setUsernameAndDone,
 };

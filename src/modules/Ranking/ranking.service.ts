@@ -1,12 +1,12 @@
-// src/modules/Ranking/ranking.service.ts
-import Spot from "@/modules/Futbolines/futbolin.model";
+import { getSignedReadUrl } from "@/infra/gcp_storage.service";
+import { FutbolinModel } from "@/modules/Futbolines/futbolin.model";
 import { UsuarioEnRanking } from "futbol-in-core/types";
 import { PipelineStage, Types } from "mongoose";
 
 type AggRow = {
-  _id: Types.ObjectId;           // addedByUserId
+  _id: Types.ObjectId; // addedByUserId
   spotsCreados: number;
-  user?: { name?: string }[];    // del $lookup
+  user?: { nombre?: string; name?: string; imagen?: string }[]; // viene del $lookup
 };
 
 export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]> {
@@ -14,7 +14,7 @@ export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]
     { $group: { _id: "$addedByUserId", spotsCreados: { $sum: 1 } } },
     {
       $lookup: {
-        from: "users",           // ⚠️ nombre real de la colección
+        from: "users",
         localField: "_id",
         foreignField: "_id",
         as: "user",
@@ -23,19 +23,34 @@ export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]
     { $sort: { spotsCreados: -1, _id: 1 } },
   ];
 
-  if (Number.isFinite(limit)) {
-    pipeline.push({ $limit: limit });
-  }
+  if (Number.isFinite(limit)) pipeline.push({ $limit: limit });
 
-  const rows = await Spot.aggregate<AggRow>(pipeline);
+  const rows = await FutbolinModel.aggregate<AggRow>(pipeline);
 
-  const list: UsuarioEnRanking[] = rows.map((r, i) => ({
-    id: String(r._id),
-    posicion: i, // si prefieres 1-based: i + 1
-    usuario: r.user?.[0]?.name ?? "(desconocido)",
-    spotsCreados: r.spotsCreados,
-    puntuacion: r.spotsCreados, // ranking simple por nº de futbolines
-  }));
+  // 🔹 Firmamos las imágenes en paralelo (si existen)
+  const list: UsuarioEnRanking[] = await Promise.all(
+    rows.map(async (r, i) => {
+      const usuario = r.user?.[0];
+      let imagenUrl: string | null = null;
+
+      if (usuario?.imagen) {
+        try {
+          imagenUrl = await getSignedReadUrl(usuario.imagen);
+        } catch (err) {
+          console.error(`Error firmando imagen de usuario ${usuario.nombre}:`, err);
+        }
+      }
+
+      return {
+        id: String(r._id),
+        posicion: i,
+        usuario: usuario?.name ?? usuario?.nombre ?? "(desconocido)",
+        imagen: imagenUrl ?? "",
+        spotsCreados: r.spotsCreados,
+        puntuacion: r.spotsCreados,
+      };
+    })
+  );
 
   return list;
 }
