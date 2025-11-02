@@ -65,8 +65,8 @@ const toDTO = (lugar: FutbolinDoc): SpotDTO => ({
   googlePlaceId: lugar.googlePlaceId,
   ciudad: lugar.ciudad,
   coordinates: [
-    lugar.location?.coordinates[1] ?? 0,
     lugar.location?.coordinates[0] ?? 0,
+    lugar.location?.coordinates[1] ?? 0,
   ],
   tipoLugar: lugar.tipoLugar as TipoLugar,
   tipoFutbolin: lugar.tipoFutbolin as TipoFutbolin,

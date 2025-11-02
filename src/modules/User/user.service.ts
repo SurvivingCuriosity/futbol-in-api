@@ -222,7 +222,6 @@ const cambiarImagen = async ({
   return { success: true, path: objectPath, url: signedUrl };
 };
 
-// TODO actualizar UserDTO
 export const mapToDTO = (user: UserDoc): UserDTO => {
   return {
     id: user._id.toString(),
