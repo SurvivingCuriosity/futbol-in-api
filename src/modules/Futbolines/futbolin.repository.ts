@@ -15,6 +15,34 @@ const findByUserId = async (idUsuario: string): Promise<FutbolinDoc[]> => {
   return spotsDeUsuario;
 };
 
+const findFromCiudad = async (ciudad: string): Promise<FutbolinDoc[]> => {
+  const provincia = ciudad.trim().toLowerCase();
+
+  // Escapa caracteres especiales de regex
+  const escaped = provincia.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Regex que busque ", <provincia>" al final o en cualquier parte
+  const regex = new RegExp(`${escaped}\\s*$`, "i");
+
+  return await FutbolinModel.find({
+    ciudad: { $regex: regex },
+  }).lean<FutbolinDoc[]>();
+};
+
+const findFromMarca = async (marca: string): Promise<FutbolinDoc[]> => {
+  const marcaSearch = marca.trim().toLowerCase();
+
+  // Escapa caracteres especiales de regex
+  const escaped = marcaSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Regex que busque ", <provincia>" al final o en cualquier parte
+  const regex = new RegExp(`${escaped}\\s*$`, "i");
+
+  return await FutbolinModel.find({
+    tipoFutbolin: { $regex: regex },
+  }).lean<FutbolinDoc[]>();
+};
+
 export type SpotCreationInput = AgregarFutbolin & {
   addedByUserId: Types.ObjectId;
   idOperador: Types.ObjectId | null;
@@ -51,4 +79,6 @@ export const FutbolinRepository = {
   findAll,
   findByUserId,
   create,
+  findFromCiudad,
+  findFromMarca
 };

@@ -14,6 +14,16 @@ const getAll = async (): Promise<SpotDTO[]> => {
   return docs.map(toDTO);
 };
 
+const getFromCiudad = async (ciudad:string): Promise<SpotDTO[]> => {
+  const docs = await FutbolinRepository.findFromCiudad(ciudad);
+  return docs.map(toDTO);
+};
+
+const getFromMarca = async (marca:string): Promise<SpotDTO[]> => {
+  const docs = await FutbolinRepository.findFromMarca(marca);
+  return docs.map(toDTO);
+};
+
 const getSpotsDeUsuario = async (idUsuario: string): Promise<SpotDTO[]> => {
   const spots = await FutbolinRepository.findByUserId(idUsuario);
   return spots.map(toDTO);
@@ -78,10 +88,13 @@ const toDTO = (lugar: FutbolinDoc): SpotDTO => ({
   idOperador: null,
   verificado: null,
   votes: {up:[], down:[]},
+  destacado: lugar.destacado
 });
 
 export const FutbolinService = {
   getAll,
   getSpotsDeUsuario,
   agregarFutbolin,
+  getFromCiudad,
+  getFromMarca
 };

@@ -8,6 +8,9 @@ import {
   coordsQuerySchema,
   searchMunicipioQuerySchema,
 } from "futbol-in-core/schemas";
+import { validate } from "@/middleware/validate";
+import z from "zod";
+import { validateParams } from "@/middleware/validateParam";
 
 const router = Router();
 
@@ -15,6 +18,12 @@ router.get(
   "/maps/getCoordinatesFromPlaceId",
   validateQuery(coordsQuerySchema),
   responseHandler(MapsController.coordinatesFromPlaceId)
+);
+
+router.get(
+  "/maps/getBaresFromPlaceIds",
+  validateQuery(z.object({ placeIds: z.string() })),
+  responseHandler(MapsController.getBaresFromPlaceIds)
 );
 
 router.get(

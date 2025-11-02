@@ -25,6 +25,7 @@ const FutbolinSchema = new Schema(
     },
     comentarios: { type: String },
     addedByUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    destacado: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

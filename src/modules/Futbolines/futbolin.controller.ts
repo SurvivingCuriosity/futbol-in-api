@@ -9,6 +9,18 @@ export const FutbolinController = {
     return ok(futbolines, "Lista de futbolines");
   },
 
+  getInCiudad: async (req: ValidatedRequest<any, { ciudad: string }, any>) => {
+    const futbolines = await FutbolinService.getFromCiudad(
+      req.validatedParams.ciudad
+    );
+    return ok(futbolines, "Lista de futbolines");
+  },
+
+  getFutbolinesPorMarca: async (req: ValidatedRequest<any, { marca: string }, any>) => {
+    const futbolines = await FutbolinService.getFromMarca(req.validatedParams.marca);
+    return ok(futbolines, "Lista de futbolines");
+  },
+
   // TODO: rename AgregarFutbolin to AgregarFutbolinBody
   agregarFutbolin: async (req: ValidatedRequest<any, AgregarFutbolin>) => {
     const futbolinCreado = await FutbolinService.agregarFutbolin(

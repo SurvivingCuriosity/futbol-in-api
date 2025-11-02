@@ -1,15 +1,24 @@
 import {
   baresAutocompleteService,
   direccionesAutocompleteService,
+  getBaresFromPlaceIds,
   getCoordinatesFromPlaceId,
   getCoordinatesFromString,
 } from "@/infra/googlemaps.service";
 import { ApiResponse, ok } from "@/utils/ApiResponse";
 import { quitarAcentos } from "@/utils/quitarAcentos";
+import { ValidatedRequest } from "@/utils/types";
 import { municipios, Province, Region, Town } from "futbol-in-core/constants";
 import { BaresAutoCompleteQuery, CoordsFromStringQuery, CoordsQuery, SearchMunicipioQuery } from "futbol-in-core/schemas";
 
 export const MapsController = {
+
+  getBaresFromPlaceIds: async (req: ValidatedRequest<any, { placeIds: string[] }>) => {
+    const ids = req.validatedQuery.placeIds.split(",");
+    const data = await getBaresFromPlaceIds(ids);
+    return ok(data, "Bares obtenidos");
+  },
+
   coordinatesFromPlaceId: async (req: {
     validatedQuery: CoordsQuery;
   }): Promise<ApiResponse<{ lat: number; lng: number }>> => {
