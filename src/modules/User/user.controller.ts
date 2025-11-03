@@ -12,6 +12,12 @@ import { isValidObjectId } from "mongoose";
 import { UserService } from "./user.service";
 
 export const UserController = {
+
+  getUserCount: async () => {
+    const count = await UserService.getUserCount();
+    return ok(count, "Usuarios");
+  },
+
   getFullUserController: async (
     req: ValidatedRequest<any, any, GetFullUserQuery>
   ) => {

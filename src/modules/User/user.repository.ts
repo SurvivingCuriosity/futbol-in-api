@@ -77,6 +77,11 @@ const updateImage = async (userId: string, path: string | null) => {
   );
 };
 
+const count = async () => {
+  const count = await UserModel.countDocuments();
+  return count;
+};
+
 export const UserRepository = {
   findAll,
   findByEmail,
@@ -85,5 +90,6 @@ export const UserRepository = {
   create,
   findByUsername,
   updateEmail,
-  updateImage
+  updateImage,
+  count
 };

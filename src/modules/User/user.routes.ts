@@ -11,6 +11,11 @@ import z from "zod";
 const router = Router();
 
 router.get(
+  "/user/count",
+  responseHandler(UserController.getUserCount)
+);
+
+router.get(
   "/user/full",
   validateQuery(getFullUserQuerySchema),
   responseHandler(UserController.getFullUserController)

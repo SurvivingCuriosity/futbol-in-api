@@ -222,6 +222,11 @@ const cambiarImagen = async ({
   return { success: true, path: objectPath, url: signedUrl };
 };
 
+const getUserCount = async () => {
+  const count = await UserRepository.count();
+  return count;
+};
+
 export const mapToDTO = (user: UserDoc): UserDTO => {
   return {
     id: user._id.toString(),
@@ -246,5 +251,6 @@ export const UserService = {
   getFullUserByUsername,
   cambiarPassword,
   cambiarEmail,
-  cambiarImagen
+  cambiarImagen,
+  getUserCount
 };
