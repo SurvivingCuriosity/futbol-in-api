@@ -1,7 +1,13 @@
 import { ApiError } from "@/utils/ApiError";
-import { AgregarFutbolin } from "futbol-in-core/schemas";
+import { AgregarFutbolin, EditarFutbolinBody } from "futbol-in-core/schemas";
 import { Types } from "mongoose";
 import { FutbolinDoc, FutbolinModel } from "./futbolin.model";
+
+const findById = async (id: string): Promise<FutbolinDoc> => {
+  const doc = await FutbolinModel.findById(id).lean<FutbolinDoc>();
+  if (!doc) throw new ApiError(404, "No se encontró el futbolín");
+  return doc;
+};
 
 const findAll = async (): Promise<FutbolinDoc[]> => {
   const allFutbolines = await FutbolinModel.find().lean<FutbolinDoc[]>();
@@ -43,6 +49,18 @@ const findFromMarca = async (marca: string): Promise<FutbolinDoc[]> => {
   }).lean<FutbolinDoc[]>();
 };
 
+const update = async (id: string, update: EditarFutbolinBody) => {
+  const { tipoFutbolin, distribucion, comentarios } = update;
+  const doc = await FutbolinModel.findById(id);
+  if (!doc) throw new ApiError(404, "No se encontró el futbolín");
+  const updated = await FutbolinModel.findByIdAndUpdate(id, {
+    tipoFutbolin,
+    distribucion,
+    comentarios,
+  });
+  return updated
+};
+
 export type SpotCreationInput = AgregarFutbolin & {
   addedByUserId: Types.ObjectId;
   idOperador: Types.ObjectId | null;
@@ -75,10 +93,18 @@ const create = async (spot: SpotCreationInput) => {
   return created.toObject<FutbolinDoc>();
 };
 
+const deleteById = async (id: string): Promise<number> => {
+  const deletedCount = await FutbolinModel.deleteOne({ _id: new Types.ObjectId(id) });
+  return deletedCount.deletedCount;
+};
+
 export const FutbolinRepository = {
+  findById,
   findAll,
+  update,
   findByUserId,
   create,
   findFromCiudad,
-  findFromMarca
+  findFromMarca,
+  deleteById
 };

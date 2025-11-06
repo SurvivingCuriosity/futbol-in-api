@@ -1,12 +1,11 @@
-import { Router } from "express";
 import { responseHandler } from "@/middleware";
-import { FutbolinController } from "./futbolin.controller";
-import { agregarFutbolinSchema } from "futbol-in-core/schemas";
-import { validate } from "@/middleware/validate";
 import { requireAuth } from "@/middleware/auth";
-import { validateQuery } from "@/middleware/validateQuery";
-import z from "zod";
+import { validate } from "@/middleware/validate";
 import { validateParams } from "@/middleware/validateParam";
+import { Router } from "express";
+import { editarFutbolinSchema, agregarFutbolinSchema } from "futbol-in-core/schemas";
+import z from "zod";
+import { FutbolinController } from "./futbolin.controller";
 
 const router = Router();
 
@@ -30,5 +29,20 @@ router.post(
   validate(agregarFutbolinSchema),
   responseHandler(FutbolinController.agregarFutbolin)
 );
+
+router.delete(
+  "/futbolines/:id",
+  requireAuth,
+  validateParams(z.object({ id: z.string() })),
+  responseHandler(FutbolinController.borrarFutbolin)
+)
+
+router.patch(
+  "/futbolines/:id",
+  requireAuth,
+  validateParams(z.object({ id: z.string() })),
+  validate(editarFutbolinSchema),
+  responseHandler(FutbolinController.editar)
+)
 
 export default router;

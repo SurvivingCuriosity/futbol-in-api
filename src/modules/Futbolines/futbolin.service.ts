@@ -3,11 +3,12 @@ import {
   SpotCreationInput,
 } from "@/modules/Futbolines/futbolin.repository.js";
 import { TipoFutbolin, TipoLugar, UserRole } from "futbol-in-core/enum";
-import { AgregarFutbolin } from "futbol-in-core/schemas";
+import { AgregarFutbolin, EditarFutbolinBody } from "futbol-in-core/schemas";
 import { SpotDTO } from "futbol-in-core/types";
 import { Types } from "mongoose";
 import { UserService } from "../User/user.service";
 import { FutbolinDoc } from "./futbolin.model";
+import { ApiError } from "@/utils/ApiError";
 
 const getAll = async (): Promise<SpotDTO[]> => {
   const docs = await FutbolinRepository.findAll();
@@ -27,6 +28,11 @@ const getFromMarca = async (marca:string): Promise<SpotDTO[]> => {
 const getSpotsDeUsuario = async (idUsuario: string): Promise<SpotDTO[]> => {
   const spots = await FutbolinRepository.findByUserId(idUsuario);
   return spots.map(toDTO);
+};
+
+const borrarFutbolin = async (id: string): Promise<{ deletedCount: number }> => {
+  const deletedCount = await FutbolinRepository.deleteById(id);
+  return { deletedCount };
 };
 
 export const agregarFutbolin = async (
@@ -67,6 +73,13 @@ export const agregarFutbolin = async (
   return toDTO(created);
 };
 
+export const editarFutbolin = async (id: string, update: EditarFutbolinBody) => {
+  const doc = await FutbolinRepository.findById(id);
+  if (!doc) throw new ApiError(404, "No se encontró el futbolín");
+  const updated = await FutbolinRepository.update(id, update);
+  return updated;
+};
+
 // TODO UPDATE SPOTDTO
 const toDTO = (lugar: FutbolinDoc): SpotDTO => ({
   id: String(lugar._id),
@@ -96,5 +109,7 @@ export const FutbolinService = {
   getSpotsDeUsuario,
   agregarFutbolin,
   getFromCiudad,
-  getFromMarca
+  getFromMarca,
+  borrarFutbolin,
+  editarFutbolin
 };
