@@ -33,7 +33,7 @@ const login = async ({ email, password }: LoginBody) => {
     id: String(user._id),
     email: user.email ?? "",
     name: user.name ?? "",
-    role: (user.role as unknown as UserRole[] || [UserRole.USER]),
+    role: (user.role as unknown as UserRole[]) || [UserRole.USER],
     status: (user.status as UserStatus) ?? UserStatus.MUST_CONFIRM_EMAIL,
     provider: user.provider ?? "",
     imagen: user.imagen ?? "",
@@ -76,6 +76,7 @@ const register = async ({ email, username, password }: RegisterBody) => {
 };
 
 const verifyEmail = async ({ email, code }: VerifyEmailBody) => {
+  console.log("En service", email);
   const emailN = normalizeEmail(email);
   const user = await AuthRepository.findByEmailWithSensitive(emailN);
   if (!user) throw new ApiError(404, "Usuario no encontrado");
@@ -91,16 +92,21 @@ const verifyEmail = async ({ email, code }: VerifyEmailBody) => {
 
   await AuthRepository.markEmailVerified(user._id);
 
+
   const payload: JwtPayload = {
     id: String(user._id),
     email: user.email,
     name: user.name ?? "",
-    role: (user.role as UserRole[] || [UserRole.USER]),
+    role: Array.isArray(user.role)
+      ? user.role.map(String)
+      : [String(user.role)],
     status: UserStatus.DONE,
     provider: user.provider ?? AuthProvider.CREDENTIALS,
     imagen: user.imagen ?? "",
   };
+  console.log("Payload construido", payload);
   const token = await signToken(payload);
+  console.log("Token de", token);
   return { token, user: payload };
 };
 
@@ -161,10 +167,9 @@ export const setUsername = async ({
   userId: string;
   username: string;
 }) => {
-
   const usernameN = normalizeUsername(username);
   const me = await UserRepository.findById(userId);
-  
+
   if (!me) throw new ApiError(404, "Usuario no encontrado");
   if (me.provider !== AuthProvider.GOOGLE)
     throw new ApiError(400, "Solo aplica a cuentas Google");
@@ -180,7 +185,7 @@ export const setUsername = async ({
     id: String(me._id),
     email: me.email ?? "",
     name: me.name ?? "",
-    role: (me.role as UserRole[] || [UserRole.USER]),
+    role: (me.role as UserRole[]) || [UserRole.USER],
     status: UserStatus.DONE,
     provider: me.provider ?? "",
     imagen: me.imagen ?? "",

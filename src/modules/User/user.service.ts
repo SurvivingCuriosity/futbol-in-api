@@ -227,6 +227,15 @@ const getUserCount = async () => {
   return count;
 };
 
+const eliminarUsuario = async (userId: string) => {
+  const user = await UserRepository.findById(userId);
+  if (!user) throw new ApiError(404, "Usuario no encontrado");
+
+  await UserRepository.deleteById(userId);
+
+  return { success: true };
+};
+
 export const mapToDTO = (user: UserDoc): UserDTO => {
   return {
     id: user._id.toString(),
@@ -252,5 +261,6 @@ export const UserService = {
   cambiarPassword,
   cambiarEmail,
   cambiarImagen,
-  getUserCount
+  getUserCount,
+  eliminarUsuario
 };

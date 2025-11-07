@@ -82,6 +82,10 @@ const count = async () => {
   return count;
 };
 
+const deleteById = async (id: string) => {
+  return UserModel.findByIdAndDelete(id);
+};
+
 export const UserRepository = {
   findAll,
   findByEmail,
@@ -91,5 +95,6 @@ export const UserRepository = {
   findByUsername,
   updateEmail,
   updateImage,
-  count
+  count,
+  deleteById
 };

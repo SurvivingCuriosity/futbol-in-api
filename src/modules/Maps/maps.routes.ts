@@ -1,16 +1,14 @@
 import { responseHandler } from "@/middleware";
 import { validateQuery } from "@/middleware/validateQuery";
 import { Router } from "express";
-import { MapsController } from "./maps.controller";
 import {
   baresAutoCompleteSchema,
   coordsFromStringSchema,
   coordsQuerySchema,
   searchMunicipioQuerySchema,
 } from "futbol-in-core/schemas";
-import { validate } from "@/middleware/validate";
 import z from "zod";
-import { validateParams } from "@/middleware/validateParam";
+import { MapsController } from "./maps.controller";
 
 const router = Router();
 

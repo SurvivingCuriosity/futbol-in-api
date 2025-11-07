@@ -1,4 +1,3 @@
-import { UserRole } from 'futbol-in-core/enum';
 import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 
 const RAW_SECRET = process.env.JWT_SECRET;
@@ -10,7 +9,7 @@ export interface JwtPayload extends JWTPayload {
   id: string;
   email: string;
   name: string;
-  role: UserRole[];
+  role: string[];
   status: string;
   provider: string;
   imagen: string;

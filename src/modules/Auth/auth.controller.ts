@@ -25,6 +25,7 @@ export const AuthController = {
   },
 
   verifyEmail: async (req: ValidatedRequest<any, VerifyEmailBody>) => {
+    console.log('En controller', req.validated)
     const { token, user } = await AuthService.verifyEmail(req.validated!);
     return ok({ token, user }, "Correo verificado con éxito");
   },

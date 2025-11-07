@@ -58,4 +58,10 @@ router.patch(
   responseHandler(UserController.cambiarImagen)
 );
 
+router.delete(
+  "/user/eliminar",
+  requireAuth,
+  responseHandler(UserController.eliminarUsuario)
+)
+
 export default router;

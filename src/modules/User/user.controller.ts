@@ -105,4 +105,13 @@ export const UserController = {
 
     return ok(result, "Imagen de perfil actualizada correctamente");
   },
+
+  eliminarUsuario: async (req: ValidatedRequest<any, any>) => {
+    const userId = req.user!.id;
+    if (!userId) throw new ApiError(403, "No autorizado");
+
+    const result = await UserService.eliminarUsuario(userId);
+
+    return ok(result, "Perfil eliminado correctamente");
+  },
 };
