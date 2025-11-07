@@ -33,7 +33,9 @@ const login = async ({ email, password }: LoginBody) => {
     id: String(user._id),
     email: user.email ?? "",
     name: user.name ?? "",
-    role: (user.role as unknown as UserRole[]) || [UserRole.USER],
+    role: Array.isArray(user.role)
+      ? user.role.map(String)
+      : [String(user.role)],
     status: (user.status as UserStatus) ?? UserStatus.MUST_CONFIRM_EMAIL,
     provider: user.provider ?? "",
     imagen: user.imagen ?? "",
@@ -151,7 +153,7 @@ export const googleSignIn = async ({ idToken }: GoogleSignInBody) => {
     email,
     provider: AuthProvider.GOOGLE,
     status: UserStatus.MUST_CREATE_USERNAME,
-    role: [UserRole.USER],
+    role: [UserRole.USER].map(String),
     imagen: "", // no importar picture
   });
 
@@ -185,7 +187,9 @@ export const setUsername = async ({
     id: String(me._id),
     email: me.email ?? "",
     name: me.name ?? "",
-    role: (me.role as UserRole[]) || [UserRole.USER],
+    role: Array.isArray(me.role)
+      ? me.role.map(String)
+      : [String(me.role)],
     status: UserStatus.DONE,
     provider: me.provider ?? "",
     imagen: me.imagen ?? "",

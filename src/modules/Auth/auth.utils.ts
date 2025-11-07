@@ -16,7 +16,9 @@ export function buildJwt (user:any, statusOverride?:UserStatus) {
     id: String(user._id),
     email: user.email ?? "",
     name: user.name ?? "",
-    role: (user.role || [UserRole.USER]).map(String),
+    role: Array.isArray(user.role)
+      ? user.role.map(String)
+      : [String(user.role)],
     status: (statusOverride ?? user.status) as UserStatus,
     provider: user.provider ?? "",
     imagen: user.imagen ?? "",
