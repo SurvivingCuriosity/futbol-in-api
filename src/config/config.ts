@@ -10,7 +10,7 @@ export const TEST = process.env.NODE_ENV === "test";
 export const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME ?? "localhost";
 export const SERVER_PORT = process.env.PORT
   ? Number(process.env.PORT)
-  : 3000;
+  : 4000;
 
 export const SERVER = {
   HOSTNAME: SERVER_HOSTNAME,
