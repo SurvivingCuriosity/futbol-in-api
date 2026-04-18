@@ -4,9 +4,9 @@ import { UsuarioEnRanking } from "futbol-in-core/types";
 import { PipelineStage, Types } from "mongoose";
 
 type AggRow = {
-  _id: Types.ObjectId; // addedByUserId
+  _id: Types.ObjectId;
   spotsCreados: number;
-  user?: { nombre?: string; name?: string; imagen?: string }[]; // viene del $lookup
+  user?: { nombre?: string; name?: string; imagen?: string; createdAt?: Date }[];
 };
 
 export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]> {
@@ -48,6 +48,7 @@ export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]
         imagen: imagenUrl ?? "",
         spotsCreados: r.spotsCreados,
         puntuacion: r.spotsCreados,
+        createdAt: usuario?.createdAt?.toISOString(),
       };
     })
   );
