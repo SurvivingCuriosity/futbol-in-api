@@ -5,56 +5,48 @@ import { validateParams } from "@/middleware/validateParam";
 import { Router } from "express";
 import {
   crearIncidenciaSchema,
-  incidenciaIdParamsSchema,
   resolverIncidenciaSchema,
   spotIdParamsSchema,
+  spotIncidenciaParamsSchema,
 } from "futbol-in-core/schemas";
 import { IncidenciaController } from "./incidencia.controller";
 
 const router = Router();
 
-// Crear incidencia (auth)
-router.post(
+// Listar todas las incidencias abiertas (solo admin)
+router.get(
   "/incidencias",
   requireAuth,
+  responseHandler(IncidenciaController.listarTodasAdmin)
+);
+
+// Crear incidencia en un spot (auth)
+router.post(
+  "/futbolines/:spotId/incidencias",
+  requireAuth,
+  validateParams(spotIdParamsSchema),
   validate(crearIncidenciaSchema),
   responseHandler(IncidenciaController.crear)
 );
 
-// Listar todas (admin; check en service)
-router.get(
-  "/incidencias",
-  requireAuth,
-  responseHandler(IncidenciaController.listarTodas)
-);
-
-// Listar incidencias por futbolín (público)
-router.get(
-  "/incidencias/spot/:spotId",
-  validateParams(spotIdParamsSchema),
-  responseHandler((req) =>
-    IncidenciaController.listarPorFutbolin(req.params.spotId)
-  )
-);
-
 // Marcar resuelto / no resuelto (admin)
 router.patch(
-  "/incidencias/:id/resolver",
+  "/futbolines/:spotId/incidencias/:id/resolver",
   requireAuth,
-  validateParams(incidenciaIdParamsSchema),
+  validateParams(spotIncidenciaParamsSchema),
   validate(resolverIncidenciaSchema),
   responseHandler((req) =>
-    IncidenciaController.resolver(req.params.id, req as any)
+    IncidenciaController.resolver(req.params.spotId, req.params.id, req as any)
   )
 );
 
-// Borrar (admin o creador)
+// Borrar incidencia (admin o creador)
 router.delete(
-  "/incidencias/:id",
+  "/futbolines/:spotId/incidencias/:id",
   requireAuth,
-  validateParams(incidenciaIdParamsSchema),
+  validateParams(spotIncidenciaParamsSchema),
   responseHandler((req) =>
-    IncidenciaController.borrar(req.params.id, req as any)
+    IncidenciaController.borrar(req.params.spotId, req.params.id, req as any)
   )
 );
 

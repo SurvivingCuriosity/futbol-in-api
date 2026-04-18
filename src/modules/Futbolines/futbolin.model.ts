@@ -26,6 +26,19 @@ const FutbolinSchema = new Schema(
     comentarios: { type: String },
     addedByUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     destacado: { type: Boolean, default: false },
+    incidencias: {
+      type: [
+        new Schema(
+          {
+            userId:   { type: Schema.Types.ObjectId, ref: "User", required: true },
+            texto:    { type: String, default: "", maxlength: 1000 },
+            resuelto: { type: Boolean, default: false },
+          },
+          { timestamps: true, _id: true }
+        ),
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

@@ -3,36 +3,47 @@ import { ValidatedRequest } from "@/utils/types";
 import { CrearIncidenciaBody, ResolverIncidenciaBody } from "futbol-in-core/schemas";
 import { IncidenciaService } from "./incidencia.service";
 
+
+
 export const IncidenciaController = {
+  listarTodasAdmin: async (req: ValidatedRequest) => {
+    const list = await IncidenciaService.listarTodasAdmin(req.user!);
+    return ok(list, "Todas las incidencias abiertas");
+  },
+
   crear: async (req: ValidatedRequest<any, CrearIncidenciaBody>) => {
-    const dto = await IncidenciaService.crear(req.validated, req.user!);
-    return ok(dto, "Incidencia creada");
-  },
-
-  listarTodas: async (req: ValidatedRequest) => {
-    const list = await IncidenciaService.listarTodas(req.user!);
-    return ok(list, "Todas las incidencias");
-  },
-
-  listarPorFutbolin: async (spotId: string) => {
-    const list = await IncidenciaService.listarPorFutbolin(spotId);
-    return ok(list, "Incidencias del futbolín");
+    const result = await IncidenciaService.crear(
+      req.params.spotId,
+      req.validated,
+      req.user!
+    );
+    return ok(result, "Incidencia creada");
   },
 
   resolver: async (
-    id: string,
+    spotId: string,
+    incidenciaId: string,
     req: ValidatedRequest<any, ResolverIncidenciaBody>
   ) => {
-    const dto = await IncidenciaService.resolver(id, req.validated, req.user!);
-    return ok(dto, "Incidencia actualizada");
+    const result = await IncidenciaService.resolver(
+      spotId,
+      incidenciaId,
+      req.validated,
+      req.user!
+    );
+    return ok(result, "Incidencia actualizada");
   },
-  
-  // TODO check BorrarUsuarioBody
+
   borrar: async (
-    id: string,
-    req: ValidatedRequest<any, ResolverIncidenciaBody>
+    spotId: string,
+    incidenciaId: string,
+    req: ValidatedRequest
   ) => {
-    const res = await IncidenciaService.borrar(id, req.user!);
-    return ok(res, "Incidencia eliminada");
+    const result = await IncidenciaService.borrar(
+      spotId,
+      incidenciaId,
+      req.user!
+    );
+    return ok(result, "Incidencia eliminada");
   },
 };

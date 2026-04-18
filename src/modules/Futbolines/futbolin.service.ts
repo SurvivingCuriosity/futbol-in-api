@@ -80,7 +80,6 @@ export const editarFutbolin = async (id: string, update: EditarFutbolinBody) => 
   return updated;
 };
 
-// TODO UPDATE SPOTDTO
 const toDTO = (lugar: FutbolinDoc): SpotDTO => ({
   id: String(lugar._id),
   nombre: lugar.nombre,
@@ -96,12 +95,19 @@ const toDTO = (lugar: FutbolinDoc): SpotDTO => ({
   distribucion: lugar.distribucion,
   comentarios: lugar.comentarios ?? "",
   addedByUserId: String(lugar.addedByUserId),
+  incidencias: (lugar.incidencias ?? []).map((i: any) => ({
+    id: String(i._id),
+    userId: String(i.userId),
+    texto: i.texto ?? "",
+    resuelto: !!i.resuelto,
+    createdAt: i.createdAt,
+  })),
   createdAt: lugar.createdAt,
   updatedAt: lugar.updatedAt,
   idOperador: null,
   verificado: null,
-  votes: {up:[], down:[]},
-  destacado: lugar.destacado
+  votes: { up: [], down: [] },
+  destacado: lugar.destacado,
 });
 
 export const FutbolinService = {

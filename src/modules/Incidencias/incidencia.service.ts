@@ -1,5 +1,6 @@
 import { ApiError } from "@/utils/ApiError";
 import { UserRole } from "futbol-in-core/enum";
+import { Incidencia } from "futbol-in-core/types";
 import {
   CrearIncidenciaBody,
   ResolverIncidenciaBody,
@@ -8,86 +9,117 @@ import { Types } from "mongoose";
 import { FutbolinModel } from "../Futbolines/futbolin.model";
 import { IncidenciaRepository } from "./incidencia.repository";
 
-export type IncidenciaDTO = {
-  id: string;
-  spotId: string;
-  userId: string;
-  texto: string;
-  resuelto: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type AdminIncidenciaDTO = Incidencia & { spotId: string };
 
-const toDTO = (i: any): IncidenciaDTO => ({
+const toDTO = (i: any): Incidencia => ({
   id: String(i._id),
-  spotId: String(i.spotId),
   userId: String(i.userId),
   texto: i.texto ?? "",
   resuelto: !!i.resuelto,
   createdAt: i.createdAt,
-  updatedAt: i.updatedAt,
 });
 
-const crear = async (body: CrearIncidenciaBody, userJwt: { id: string }) => {
-  // sanity: spot existe
-  const exists = await FutbolinModel.exists({ _id: body.spotId });
-  if (!exists) throw new ApiError(404, "Futbolín no encontrado");
+const crear = async (
+  spotId: string,
+  body: CrearIncidenciaBody,
+  userJwt: { id: string }
+) => {
+  const spot = await FutbolinModel.exists({ _id: spotId });
+  if (!spot) throw new ApiError(404, "Futbolín no encontrado");
 
-  const doc = await IncidenciaRepository.create({
-    spotId: new Types.ObjectId(body.spotId as string),
+  const updated = await IncidenciaRepository.push(spotId, {
     userId: new Types.ObjectId(userJwt.id),
     texto: body.texto ?? "",
   });
-  return toDTO(doc);
-};
 
-const listarTodas = async (userJwt: { id: string; role: string[] }) => {
-  if (!userJwt.role?.includes(UserRole.ADMIN)) {
-    throw new ApiError(403, "Solo admin puede ver todas las incidencias");
-  }
-  const docs = await IncidenciaRepository.findAll();
-  return docs.map(toDTO);
-};
+  const created = updated?.incidencias?.at(-1);
+  if (!created) throw new ApiError(500, "Error al crear incidencia");
 
-const listarPorFutbolin = async (spotId: string) => {
-  const docs = await IncidenciaRepository.findBySpotId(spotId);
-  return docs.map(toDTO);
+  return { spotId, incidencia: toDTO(created) };
 };
 
 const resolver = async (
-  id: string,
+  spotId: string,
+  incidenciaId: string,
   body: ResolverIncidenciaBody,
   userJwt: { id: string; role: string[] }
 ) => {
   if (!userJwt.role?.includes(UserRole.ADMIN)) {
     throw new ApiError(403, "Solo admin puede marcar como resuelto");
   }
+
   const updated = await IncidenciaRepository.resolveById(
-    id,
+    spotId,
+    incidenciaId,
     body.resuelto ?? true
   );
   if (!updated) throw new ApiError(404, "Incidencia no encontrada");
-  return toDTO(updated);
+
+  const inc = updated.incidencias?.find(
+    (i: any) => String(i._id) === incidenciaId
+  );
+  if (!inc) throw new ApiError(404, "Incidencia no encontrada");
+
+  return { spotId, incidencia: toDTO(inc) };
 };
 
-const borrar = async (id: string, userJwt: { id: string; role: string[] }) => {
-  const found = await IncidenciaRepository.findById(id);
-  if (!found) throw new ApiError(404, "Incidencia no encontrada");
+const borrar = async (
+  spotId: string,
+  incidenciaId: string,
+  userJwt: { id: string; role: string[] }
+) => {
+  const inc = await IncidenciaRepository.findIncidenciaInSpot(
+    spotId,
+    incidenciaId
+  );
+  if (!inc) throw new ApiError(404, "Incidencia no encontrada");
 
-  const isOwner = String(found.userId) === userJwt.id;
+  const isOwner = String(inc.userId) === userJwt.id;
   const isAdmin = userJwt.role?.includes(UserRole.ADMIN);
-
   if (!isOwner && !isAdmin)
     throw new ApiError(403, "No autorizado para borrar esta incidencia");
 
-  await IncidenciaRepository.removeById(id);
-  return { id };
+  await IncidenciaRepository.pull(spotId, incidenciaId);
+  return { id: incidenciaId };
+};
+
+const listarTodasAdmin = async (userJwt: {
+  id: string;
+  role: string[];
+}): Promise<AdminIncidenciaDTO[]> => {
+  if (!userJwt.role?.includes(UserRole.ADMIN)) {
+    throw new ApiError(403, "Solo admin puede ver todas las incidencias");
+  }
+
+  const rows = await FutbolinModel.aggregate([
+    { $unwind: "$incidencias" },
+    { $match: { "incidencias.resuelto": false } },
+    {
+      $project: {
+        _id: "$incidencias._id",
+        spotId: { $toString: "$_id" },
+        userId: { $toString: "$incidencias.userId" },
+        texto: { $ifNull: ["$incidencias.texto", ""] },
+        resuelto: "$incidencias.resuelto",
+        createdAt: "$incidencias.createdAt",
+      },
+    },
+    { $sort: { createdAt: -1 } },
+  ]);
+
+  return rows.map((i: any) => ({
+    id: String(i._id),
+    spotId: i.spotId,
+    userId: i.userId,
+    texto: i.texto ?? "",
+    resuelto: i.resuelto,
+    createdAt: i.createdAt,
+  }));
 };
 
 export const IncidenciaService = {
   crear,
-  listarTodas,
-  listarPorFutbolin,
+  listarTodasAdmin,
   resolver,
   borrar,
 };

@@ -1,47 +1,48 @@
 import { Types } from "mongoose";
-import { IncidenciaDoc, IncidenciaModel } from "./incidencia.model";
+import { FutbolinModel } from "../Futbolines/futbolin.model";
 
-const create = async (input: {
-  spotId: Types.ObjectId;
-  userId: Types.ObjectId;
-  texto: string;
-}) => {
-  const doc = await IncidenciaModel.create(input);
-  return doc.toObject<IncidenciaDoc>();
-};
-
-const findAll = async (): Promise<IncidenciaDoc[]> => {
-  return IncidenciaModel.find().lean<IncidenciaDoc[]>();
-};
-
-const findBySpotId = async (spotId: string): Promise<IncidenciaDoc[]> => {
-  return IncidenciaModel.find({ spotId })
-    .sort({ createdAt: -1 })
-    .lean<IncidenciaDoc[]>();
-};
-
-const findById = async (id: string): Promise<IncidenciaDoc | null> => {
-  return IncidenciaModel.findById(id).lean<IncidenciaDoc | null>();
-};
-
-const resolveById = async (id: string, resuelto: boolean) => {
-  const updated = await IncidenciaModel.findByIdAndUpdate(
-    id,
-    { $set: { resuelto } },
+const push = async (
+  spotId: string,
+  input: { userId: Types.ObjectId; texto: string }
+) => {
+  return FutbolinModel.findByIdAndUpdate(
+    spotId,
+    { $push: { incidencias: { ...input, createdAt: new Date() } } },
     { new: true }
-  ).lean<IncidenciaDoc | null>();
-  return updated;
+  ).lean();
 };
 
-const removeById = async (id: string) => {
-  await IncidenciaModel.findByIdAndDelete(id);
+const resolveById = async (
+  spotId: string,
+  incidenciaId: string,
+  resuelto: boolean
+) => {
+  return FutbolinModel.findOneAndUpdate(
+    { _id: spotId, "incidencias._id": new Types.ObjectId(incidenciaId) },
+    { $set: { "incidencias.$.resuelto": resuelto } },
+    { new: true }
+  ).lean();
+};
+
+const pull = async (spotId: string, incidenciaId: string) => {
+  return FutbolinModel.findByIdAndUpdate(
+    spotId,
+    { $pull: { incidencias: { _id: new Types.ObjectId(incidenciaId) } } },
+    { new: true }
+  ).lean();
+};
+
+const findIncidenciaInSpot = async (spotId: string, incidenciaId: string) => {
+  const spot = await FutbolinModel.findOne(
+    { _id: spotId, "incidencias._id": new Types.ObjectId(incidenciaId) },
+    { "incidencias.$": 1 }
+  ).lean();
+  return spot?.incidencias?.[0] ?? null;
 };
 
 export const IncidenciaRepository = {
-  create,
-  findAll,
-  findBySpotId,
-  findById,
+  push,
   resolveById,
-  removeById,
+  pull,
+  findIncidenciaInSpot,
 };
