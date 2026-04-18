@@ -6,12 +6,13 @@ import { PipelineStage, Types } from "mongoose";
 type AggRow = {
   _id: Types.ObjectId;
   spotsCreados: number;
-  user?: { nombre?: string; name?: string; imagen?: string; createdAt?: Date }[];
+  ciudades: string[];
+  user?: { nombre?: string; name?: string; imagen?: string; createdAt?: Date; ciudad?: string; posicion?: string }[];
 };
 
 export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]> {
   const pipeline: PipelineStage[] = [
-    { $group: { _id: "$addedByUserId", spotsCreados: { $sum: 1 } } },
+    { $group: { _id: "$addedByUserId", spotsCreados: { $sum: 1 }, ciudades: { $addToSet: "$ciudad" } } },
     {
       $lookup: {
         from: "users",
@@ -41,6 +42,19 @@ export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]
         }
       }
 
+      const provincias = [
+        ...new Set(
+          r.ciudades.map((c) => c.split(",").at(-1)?.trim()).filter(Boolean)
+        ),
+      ] as string[];
+
+      const perfilCompleto = !!(
+        usuario?.nombre &&
+        usuario?.ciudad &&
+        usuario?.posicion &&
+        usuario?.imagen
+      );
+
       return {
         id: String(r._id),
         posicion: i,
@@ -49,6 +63,8 @@ export async function getRanking(limit: number = 20): Promise<UsuarioEnRanking[]
         spotsCreados: r.spotsCreados,
         puntuacion: r.spotsCreados,
         createdAt: usuario?.createdAt?.toISOString(),
+        provincias,
+        perfilCompleto,
       };
     })
   );
